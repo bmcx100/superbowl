@@ -37,6 +37,7 @@ export function Navbar() {
           <div className="nav-links">
             <Link href="/picks" className="nav-link">Make Your Picks</Link>
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
+            <Link href="/squares" className="nav-link">Squares</Link>
           </div>
 
           <div className="nav-actions">
@@ -65,6 +66,9 @@ export function Navbar() {
             </Link>
             <Link href="/leaderboard" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
               Leaderboard
+            </Link>
+            <Link href="/squares" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
+              Squares
             </Link>
             <div className="nav-mobile-bottom">
               <Link href="/admin" className="nav-mobile-cta" onClick={() => setMobileOpen(false)}>

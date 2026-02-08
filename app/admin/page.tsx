@@ -31,10 +31,10 @@ import {
   clearAllResults,
   clearAllFriends,
   clearAllProps,
-  exportBackup,
-  importBackup,
 } from "@/lib/store"
+import { exportSquaresBackup, importSquaresBackup } from "@/lib/squaresStore"
 import { Leaderboard } from "@/components/Leaderboard"
+import { SquaresAdmin } from "@/components/squares/SquaresAdmin"
 import type { AppState, Friend, Prop } from "@/lib/types"
 
 export default function AdminPage() {
@@ -185,12 +185,12 @@ export default function AdminPage() {
   }
 
   const handleDownloadBackup = () => {
-    const json = exportBackup()
+    const json = exportSquaresBackup()
     const blob = new Blob([json], { type: "application/json" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = "super-bowl-props-backup.json"
+    a.download = "super-bowl-full-backup.json"
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -203,11 +203,11 @@ export default function AdminPage() {
       const json = reader.result as string
       setConfirmAction({
         title: "Restore backup?",
-        description: "This will overwrite all current data. Continue?",
+        description: "This will overwrite all Props AND Squares data. Continue?",
         confirmLabel: "Restore",
         variant: "destructive",
         onConfirm: () => {
-          importBackup(json)
+          importSquaresBackup(json)
           const s = getState()
           setAppState(s)
           setEventName(s.eventName)
@@ -268,6 +268,8 @@ export default function AdminPage() {
     refresh()
   }
 
+  const [adminMode, setAdminMode] = useState<"props" | "squares">("props")
+
   if (!appState) return null
 
   const statusLabel = (friend: Friend) => {
@@ -287,6 +289,26 @@ export default function AdminPage() {
         <h1 className="admin-title">Admin Panel</h1>
       </div>
 
+      <div className="admin-mode-toggle">
+        <button
+          className={`admin-mode-btn ${adminMode === "props" ? "admin-mode-active" : ""}`}
+          onClick={() => setAdminMode("props")}
+        >
+          Props
+        </button>
+        <button
+          className={`admin-mode-btn ${adminMode === "squares" ? "admin-mode-active" : ""}`}
+          onClick={() => setAdminMode("squares")}
+        >
+          Squares
+        </button>
+      </div>
+
+      {adminMode === "squares" && (
+        <SquaresAdmin />
+      )}
+
+      {adminMode === "props" && (
       <Tabs defaultValue="friends" className="admin-tabs">
         <TabsList className="admin-tabs-list">
           <TabsTrigger value="friends" className="admin-tab-trigger">
@@ -552,6 +574,7 @@ export default function AdminPage() {
           </div>
         </TabsContent>
       </Tabs>
+      )}
 
       {/* Rename dialog */}
       <Dialog

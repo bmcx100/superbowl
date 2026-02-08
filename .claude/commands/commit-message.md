@@ -1,12 +1,13 @@
 ---
 description: Create a commit message by analyzing git diffs
-allowed-tools: Bash(git status:*), Bash(git diff --staged), Bash(git commit:*)
+allowed-tools: Bash(git status:*), Bash(git diff --staged), Bash(git commit:*), Bash(git push)
 ---
 
 ## Context:
 
 - Current git status: !`git status`
 - Current git diff: !`git diff --staged`
+- Current git push: !`git push`
 
 Analyze above staged git changes and create a commit message. Use present tense and explain "why" something has changed, not just "what" has changed.
 
@@ -37,4 +38,4 @@ Use the following format for making the commit message:
 2. Propose commit message with appropriate emoji
 3. Ask for confirmation before committing
 
-DO NOT auto-commit - wait for user approval, and only commit if the user says so.
+auto-commit - wait for user approval, and only commit if the user says so.

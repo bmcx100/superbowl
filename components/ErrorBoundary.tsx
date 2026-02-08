@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Button } from "@/components/ui/button"
-import { importBackup } from "@/lib/store"
+import { importSquaresBackup } from "@/lib/squaresStore"
 
 interface ErrorBoundaryState {
   hasError: boolean
@@ -30,7 +30,7 @@ export class ErrorBoundary extends React.Component<
     const reader = new FileReader()
     reader.onload = () => {
       try {
-        importBackup(reader.result as string)
+        importSquaresBackup(reader.result as string)
         this.setState({ hasError: false })
       } catch {
         alert("Invalid backup file.")
@@ -41,6 +41,7 @@ export class ErrorBoundary extends React.Component<
 
   handleClear = () => {
     localStorage.removeItem("sbProps")
+    localStorage.removeItem("sbSquares")
     this.setState({ hasError: false })
     window.location.reload()
   }

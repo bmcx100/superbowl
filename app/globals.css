@@ -1126,6 +1126,47 @@
   text-transform: uppercase;
 }
 
+.admin-mode-toggle {
+  @apply flex gap-2;
+  margin-bottom: 24px;
+}
+
+.admin-mode-btn {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 600;
+  font-size: 1.2rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 28px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-mode-btn:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.admin-mode-active {
+  background: var(--sb-magenta);
+  border-color: var(--sb-magenta);
+  color: #ffffff;
+}
+
+.admin-mode-active:hover {
+  border-color: var(--sb-magenta);
+  color: #ffffff;
+}
+
+.admin-squares-stub {
+  @apply flex items-center justify-center;
+  min-height: 200px;
+}
+
 .admin-tabs {
   @apply flex flex-col gap-6;
 }
@@ -1701,6 +1742,541 @@
 /* =================================================================
    ERROR BOUNDARY
    ================================================================= */
+/* =================================================================
+   SQUARES PAGE
+   ================================================================= */
+.squares-page {
+  @apply relative flex flex-col items-center;
+  background: var(--sb-dark);
+  padding: 60px 40px;
+  min-height: 60vh;
+}
+
+.squares-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--sb-cyan), var(--sb-magenta), transparent);
+  box-shadow: 0 0 40px rgba(0, 200, 240, 0.3);
+}
+
+.squares-page-title {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 2.4rem;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* --- Info bar --- */
+.sq-info-bar {
+  @apply flex items-center justify-center gap-6 flex-wrap;
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 32px;
+}
+
+.sq-info-item {
+  letter-spacing: 0.04em;
+}
+
+.sq-info-link {
+  color: var(--sb-cyan);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.sq-info-link:hover {
+  color: var(--sb-magenta);
+}
+
+/* --- Grid wrapper --- */
+.sq-grid-wrapper {
+  @apply flex flex-col;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.sq-col-header {
+  @apply flex items-center;
+  padding-left: 52px;
+  margin-bottom: 4px;
+}
+
+.sq-corner {
+  width: 52px;
+  flex-shrink: 0;
+}
+
+.sq-team-label {
+  @apply flex items-center gap-2;
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+}
+
+.sq-team-label-vertical {
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  justify-content: center;
+  height: 100%;
+}
+
+.sq-team-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.sq-grid-body {
+  @apply flex;
+}
+
+.sq-row-header {
+  @apply flex items-center;
+  width: 48px;
+  flex-shrink: 0;
+  padding-top: 42px;
+}
+
+.sq-grid-inner {
+  @apply flex flex-col;
+}
+
+/* --- Number cells --- */
+.sq-numbers-row {
+  @apply flex;
+  height: 38px;
+}
+
+.sq-number-corner {
+  width: 42px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.sq-number-cell {
+  @apply flex items-center justify-center;
+  width: 56px;
+  height: 38px;
+  flex-shrink: 0;
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--sb-cyan);
+  letter-spacing: 0.05em;
+}
+
+.sq-row {
+  @apply flex;
+  height: 56px;
+}
+
+.sq-row .sq-number-cell {
+  width: 42px;
+  height: 56px;
+}
+
+/* --- Square cells --- */
+.sq-cell {
+  @apply flex items-center justify-center relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: default;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.sq-cell-empty {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sq-cell-interactive {
+  cursor: pointer;
+}
+
+.sq-cell-interactive:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sq-cell-claimed {
+  cursor: pointer;
+}
+
+.sq-cell-initial {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.sq-cell-fullname {
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  line-height: 1.1;
+  text-align: center;
+  word-break: break-word;
+  padding: 2px;
+}
+
+/* --- Winner badge on cell --- */
+.sq-cell-winner {
+  box-shadow: inset 0 0 0 3px var(--sb-gold), 0 0 12px rgba(240, 200, 8, 0.4);
+}
+
+.sq-cell-winner-badge {
+  @apply absolute;
+  top: -6px;
+  right: -6px;
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: var(--sb-gold);
+  color: #0a0c10;
+  padding: 1px 4px;
+  border-radius: 3px;
+  line-height: 1.2;
+  z-index: 2;
+}
+
+/* --- Winners table --- */
+.sq-winners {
+  @apply w-full;
+  max-width: 700px;
+  margin-top: 48px;
+}
+
+.sq-winners-title {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 1.8rem;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.sq-winners-table {
+  @apply w-full;
+  border-collapse: collapse;
+  font-family: var(--font-barlow), sans-serif;
+}
+
+.sq-winners-table th {
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  color: var(--sb-cyan);
+  text-transform: uppercase;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 2px solid rgba(0, 200, 240, 0.2);
+}
+
+.sq-winners-table td {
+  padding: 12px 16px;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sq-winners-checkpoint {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--sb-gold) !important;
+}
+
+.sq-winners-name {
+  font-weight: 600;
+  color: #ffffff !important;
+}
+
+/* --- Claim squares button --- */
+.sq-claim-btn {
+  font-family: var(--font-oswald), sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  letter-spacing: 0.1em !important;
+  padding: 8px 24px !important;
+  height: auto !important;
+  border-radius: 6px !important;
+  background: var(--sb-cyan) !important;
+  color: #ffffff !important;
+}
+
+/* --- Player selector grid --- */
+.sq-player-grid {
+  @apply grid gap-4 w-full;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  max-width: 900px;
+  margin-bottom: 40px;
+}
+
+.sq-player-card {
+  @apply flex items-center gap-3;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--sb-surface);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.sq-player-card:hover {
+  border-color: var(--sb-cyan);
+  background: rgba(0, 200, 240, 0.06);
+}
+
+.sq-player-full {
+  opacity: 0.5;
+}
+
+.sq-player-color {
+  @apply flex items-center justify-center flex-shrink-0;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.sq-player-info {
+  @apply flex flex-col;
+}
+
+.sq-player-name {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+}
+
+.sq-player-count {
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* --- Claiming page --- */
+.sq-claim-header {
+  @apply flex w-full;
+  max-width: 900px;
+  margin-bottom: 16px;
+}
+
+.sq-claim-back {
+  @apply flex items-center gap-2;
+  font-family: var(--font-barlow), sans-serif !important;
+  font-size: 1.1rem !important;
+  color: var(--sb-cyan) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: transparent !important;
+}
+
+.sq-claim-info {
+  @apply flex items-center gap-4;
+  margin-bottom: 24px;
+}
+
+.sq-claim-color {
+  @apply flex items-center justify-center flex-shrink-0;
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.sq-claim-details {
+  @apply flex flex-col;
+}
+
+.sq-claim-name {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+
+.sq-claim-count {
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 1.1rem;
+  color: var(--sb-cyan);
+  font-weight: 500;
+}
+
+/* --- Squares Admin --- */
+.sq-admin {
+  @apply w-full;
+}
+
+.sq-admin-section {
+  @apply flex flex-col gap-3;
+  margin-bottom: 28px;
+}
+
+.sq-admin-stats {
+  @apply flex flex-wrap gap-4;
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sq-admin-action-btn {
+  font-family: var(--font-oswald), sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  letter-spacing: 0.08em !important;
+  padding: 10px 24px !important;
+  height: auto !important;
+}
+
+.sq-admin-color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.sq-admin-claimed-count {
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.sq-admin-extra-badge {
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--sb-gold);
+  color: #0a0c10;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.sq-admin-color-input {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: transparent;
+  padding: 0;
+}
+
+.sq-admin-inline-dialog {
+  @apply flex items-center gap-3;
+  margin-top: 12px;
+}
+
+.sq-admin-extras-list {
+  @apply flex flex-wrap gap-2;
+}
+
+.sq-admin-autofill-list {
+  @apply flex flex-wrap gap-2;
+}
+
+.sq-admin-place-grid {
+  margin-top: 16px;
+  overflow-x: auto;
+}
+
+.sq-admin-place-hint {
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 12px;
+}
+
+.sq-admin-hint {
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.sq-admin-numbers-display {
+  @apply flex flex-col gap-2;
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 12px;
+}
+
+.sq-admin-scoring {
+  @apply flex flex-col gap-4;
+}
+
+.sq-admin-score-row {
+  @apply flex items-center gap-4 flex-wrap;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sq-admin-score-label {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--sb-gold);
+  letter-spacing: 0.08em;
+  min-width: 60px;
+}
+
+.sq-admin-score-inputs {
+  @apply flex items-center gap-2;
+}
+
+.sq-admin-score-input {
+  width: 80px !important;
+  text-align: center;
+}
+
+.sq-admin-score-result {
+  @apply flex items-center gap-3 flex-wrap;
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sq-admin-score-winner {
+  font-weight: 600;
+  color: var(--sb-green);
+}
+
+.sq-admin-winner-row {
+  @apply flex items-center gap-3;
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 8px 0;
+}
+
+/* =================================================================
+   ERROR BOUNDARY
+   ================================================================= */
 .error-boundary {
   @apply flex flex-col items-center justify-center;
   min-height: 60vh;
@@ -2067,6 +2643,111 @@
   box-shadow: none;
 }
 
+/* --- Squares page light --- */
+.light .squares-page {
+  background: var(--background);
+}
+
+.light .squares-page::before {
+  box-shadow: none;
+}
+
+.light .squares-page-title {
+  color: #1a1d24;
+}
+
+.light .sq-info-bar {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.light .sq-team-label {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.light .sq-number-cell {
+  color: #0080a0;
+}
+
+.light .sq-cell {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.light .sq-cell-empty {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.light .sq-cell-interactive:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.light .sq-winners-title {
+  color: #1a1d24;
+}
+
+.light .sq-winners-table td {
+  color: rgba(0, 0, 0, 0.7);
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+.light .sq-winners-name {
+  color: #1a1d24 !important;
+}
+
+.light .sq-player-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.light .sq-player-card:hover {
+  border-color: var(--sb-cyan);
+  background: rgba(0, 200, 240, 0.04);
+}
+
+.light .sq-player-name {
+  color: #1a1d24;
+}
+
+.light .sq-player-count {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.light .sq-claim-back {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+.light .sq-claim-name {
+  color: #1a1d24;
+}
+
+.light .sq-admin-stats {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.light .sq-admin-claimed-count {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.light .sq-admin-place-hint,
+.light .sq-admin-hint {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.light .sq-admin-numbers-display {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.light .sq-admin-score-row {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+.light .sq-admin-score-result {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.light .sq-admin-winner-row {
+  color: rgba(0, 0, 0, 0.7);
+}
+
 .light .picks-back {
   color: var(--sb-cyan);
 }
@@ -2137,6 +2818,22 @@
 
 .light .admin-back:hover {
   background: rgba(0, 200, 240, 0.06);
+}
+
+.light .admin-mode-btn {
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.light .admin-mode-btn:hover {
+  border-color: rgba(0, 0, 0, 0.25);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.light .admin-mode-active {
+  background: var(--sb-magenta);
+  border-color: var(--sb-magenta);
+  color: #ffffff;
 }
 
 .light .admin-tabs-list {
