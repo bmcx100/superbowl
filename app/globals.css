@@ -1121,6 +1121,147 @@
   height: auto !important;
 }
 
+/* Prop list */
+.admin-prop-list {
+  @apply flex flex-col gap-3;
+}
+
+.admin-prop-row {
+  @apply flex items-center gap-4;
+  background: var(--sb-surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+
+.admin-prop-order {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--sb-cyan);
+  min-width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.admin-prop-info {
+  @apply flex flex-col flex-1;
+  min-width: 0;
+}
+
+.admin-prop-question {
+  font-family: var(--font-barlow), sans-serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+.admin-prop-options {
+  font-family: var(--font-barlow), sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 2px;
+}
+
+.admin-prop-actions {
+  @apply flex items-center gap-2;
+  flex-shrink: 0;
+}
+
+.admin-arrow-btn {
+  padding: 8px !important;
+  height: auto !important;
+  min-width: 0 !important;
+}
+
+.admin-edit-warning {
+  font-family: var(--font-barlow), sans-serif !important;
+  font-size: 1rem !important;
+  color: var(--sb-gold) !important;
+}
+
+.admin-edit-fields {
+  @apply flex flex-col gap-3;
+}
+
+/* Settings section */
+.admin-settings-section {
+  margin-bottom: 40px;
+}
+
+.admin-reset-grid {
+  @apply grid grid-cols-2 gap-3;
+}
+
+.admin-reset-btn {
+  font-family: var(--font-barlow), sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+  padding: 14px 20px !important;
+  height: auto !important;
+}
+
+.admin-backup-row {
+  @apply flex flex-wrap gap-3;
+}
+
+.admin-file-input {
+  display: none;
+}
+
+/* Scoring list */
+.admin-scoring-list {
+  @apply flex flex-col gap-3;
+}
+
+.admin-scoring-row {
+  @apply flex items-center justify-between gap-4;
+  background: var(--sb-surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+
+.admin-scoring-info {
+  @apply flex items-baseline gap-3 flex-1;
+  min-width: 0;
+}
+
+.admin-scoring-buttons {
+  @apply flex items-center gap-2;
+  flex-shrink: 0;
+}
+
+.admin-score-btn {
+  font-family: var(--font-barlow), sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  padding: 8px 16px !important;
+  height: auto !important;
+}
+
+.admin-score-active {
+  background: rgba(139, 197, 63, 0.2) !important;
+  border-color: var(--sb-green) !important;
+  color: var(--sb-green) !important;
+}
+
+.admin-scoring-leaderboard {
+  margin-top: 48px;
+}
+
+.admin-section-title {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 1.8rem;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
 .admin-placeholder {
   font-family: var(--font-barlow), sans-serif;
   font-size: 1.3rem;
@@ -1437,6 +1578,41 @@
   letter-spacing: 0.04em;
   color: rgba(255, 255, 255, 0.5);
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* =================================================================
+   ERROR BOUNDARY
+   ================================================================= */
+.error-boundary {
+  @apply flex flex-col items-center justify-center;
+  min-height: 60vh;
+  padding: 40px;
+  text-align: center;
+}
+
+.error-boundary-title {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--sb-red-bridge);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.error-boundary-desc {
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 500px;
+  margin-bottom: 32px;
+}
+
+.error-boundary-actions {
+  @apply flex items-center gap-3;
+}
+
+.light .error-boundary-desc {
+  color: rgba(0, 0, 0, 0.6);
 }
 
 /* =================================================================
@@ -1776,6 +1952,28 @@
   color: #1a1d24;
 }
 
+.light .admin-prop-row {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.light .admin-prop-question {
+  color: #1a1d24;
+}
+
+.light .admin-prop-options {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.light .admin-scoring-row {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.light .admin-section-title {
+  color: #1a1d24;
+}
+
 .light .admin-placeholder {
   color: rgba(0, 0, 0, 0.4);
 }
@@ -2008,6 +2206,29 @@
     flex: 1;
     font-size: 0.9rem !important;
     padding: 8px 10px !important;
+  }
+
+  .admin-scoring-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .admin-scoring-buttons {
+    width: 100%;
+  }
+
+  .admin-score-btn {
+    flex: 1;
+  }
+
+  .admin-prop-row {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+
+  .admin-prop-actions {
+    width: 100%;
   }
 
   /* Picks page — phone */

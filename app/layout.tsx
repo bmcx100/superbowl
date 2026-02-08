@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 }
 
 import { Navbar } from "@/components/navbar"
+import { ErrorBoundary } from "@/components/ErrorBoundary"
 
 export default function RootLayout({
   children,
@@ -35,7 +36,9 @@ export default function RootLayout({
         className={`${oswald.variable} ${barlowCondensed.variable} antialiased`}
       >
         <Navbar />
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </body>
     </html>
   )

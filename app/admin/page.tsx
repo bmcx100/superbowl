@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, ChevronUp, ChevronDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -21,18 +22,40 @@ import {
   renameFriend,
   deleteFriend,
   resetFriendPicks,
+  updateProp,
+  reorderProps,
+  setCorrectAnswer,
+  getLeaderboard,
+  saveState,
+  clearAllPicks,
+  clearAllResults,
+  clearAllFriends,
+  clearAllProps,
+  exportBackup,
+  importBackup,
 } from "@/lib/store"
-import type { AppState, Friend } from "@/lib/types"
+import { Leaderboard } from "@/components/Leaderboard"
+import type { AppState, Friend, Prop } from "@/lib/types"
 
 export default function AdminPage() {
   const router = useRouter()
   const [appState, setAppState] = useState<AppState | null>(null)
+  const [leaderboard, setLeaderboard] = useState(() => getLeaderboard())
   const [newName, setNewName] = useState("")
   const [addError, setAddError] = useState("")
 
   // Rename dialog state
   const [renameTarget, setRenameTarget] = useState<Friend | null>(null)
   const [renameName, setRenameName] = useState("")
+
+  const [eventName, setEventName] = useState("")
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Edit prop dialog state
+  const [editProp, setEditProp] = useState<Prop | null>(null)
+  const [editQuestion, setEditQuestion] = useState("")
+  const [editOptionA, setEditOptionA] = useState("")
+  const [editOptionB, setEditOptionB] = useState("")
 
   // Confirm dialog state
   const [confirmAction, setConfirmAction] = useState<{
@@ -44,10 +67,16 @@ export default function AdminPage() {
   } | null>(null)
 
   useEffect(() => {
-    setAppState(getState())
+    const s = getState()
+    setAppState(s)
+    setEventName(s.eventName)
+    setLeaderboard(getLeaderboard())
   }, [])
 
-  const refresh = () => setAppState(getState())
+  const refresh = () => {
+    setAppState(getState())
+    setLeaderboard(getLeaderboard())
+  }
 
   const getPickCount = (friend: Friend) => Object.keys(friend.picks).length
 
@@ -117,6 +146,126 @@ export default function AdminPage() {
         refresh()
       },
     })
+  }
+
+  const sortedProps = appState
+    ? [...appState.props].sort((a, b) => a.order - b.order)
+    : []
+
+  const openEditProp = (prop: Prop) => {
+    setEditProp(prop)
+    setEditQuestion(prop.question)
+    setEditOptionA(prop.optionA)
+    setEditOptionB(prop.optionB)
+  }
+
+  const handleEditPropSubmit = () => {
+    if (!editProp) return
+    updateProp(editProp.id, editQuestion.trim(), editOptionA.trim(), editOptionB.trim())
+    setEditProp(null)
+    refresh()
+  }
+
+  const handleMoveProp = (index: number, direction: "up" | "down") => {
+    const ids = sortedProps.map((p) => p.id)
+    const targetIndex = direction === "up" ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= ids.length) return
+    const temp = ids[index]
+    ids[index] = ids[targetIndex]
+    ids[targetIndex] = temp
+    reorderProps(ids)
+    refresh()
+  }
+
+  const handleEventNameSave = () => {
+    if (!appState) return
+    const updated = { ...appState, eventName: eventName.trim() || appState.eventName }
+    saveState(updated)
+    refresh()
+  }
+
+  const handleDownloadBackup = () => {
+    const json = exportBackup()
+    const blob = new Blob([json], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "super-bowl-props-backup.json"
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleRestoreFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      const json = reader.result as string
+      setConfirmAction({
+        title: "Restore backup?",
+        description: "This will overwrite all current data. Continue?",
+        confirmLabel: "Restore",
+        variant: "destructive",
+        onConfirm: () => {
+          importBackup(json)
+          const s = getState()
+          setAppState(s)
+          setEventName(s.eventName)
+          setLeaderboard(getLeaderboard())
+        },
+      })
+    }
+    reader.readAsText(file)
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  const handleExportPicksCSV = () => {
+    if (!appState) return
+    const props = [...appState.props].sort((a, b) => a.order - b.order)
+    const friends = appState.friends
+    const header = ["Question", "Option A", "Option B", "Correct Answer", ...friends.map((f) => f.name)]
+    const rows = props.map((prop) => {
+      const correct = prop.correctAnswer === "A" ? prop.optionA : prop.correctAnswer === "B" ? prop.optionB : ""
+      const picks = friends.map((f) => {
+        const pick = f.picks[prop.id]
+        if (pick === "A") return prop.optionA
+        if (pick === "B") return prop.optionB
+        return ""
+      })
+      return [prop.question, prop.optionA, prop.optionB, correct, ...picks]
+    })
+    const csv = [header, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n")
+    const blob = new Blob([csv], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "picks-matrix.csv"
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleExportLeaderboardCSV = () => {
+    const entries = getLeaderboard()
+    const header = ["Name", "Correct", "Scored", "Accuracy"]
+    const rows = entries.map((e) => [
+      e.name,
+      String(e.correct),
+      String(e.scored),
+      e.scored > 0 ? `${Math.round(e.accuracy * 100)}%` : "0%",
+    ])
+    const csv = [header, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n")
+    const blob = new Blob([csv], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "leaderboard.csv"
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleScore = (propId: string, value: "A" | "B" | null) => {
+    setCorrectAnswer(propId, value)
+    refresh()
   }
 
   if (!appState) return null
@@ -217,15 +366,190 @@ export default function AdminPage() {
         </TabsContent>
 
         <TabsContent value="props">
-          <p className="admin-placeholder">Props management coming soon.</p>
+          <div className="admin-prop-list">
+            {sortedProps.map((prop, i) => (
+              <div key={prop.id} className="admin-prop-row">
+                <div className="admin-prop-order">{i + 1}</div>
+                <div className="admin-prop-info">
+                  <span className="admin-prop-question">{prop.question}</span>
+                  <span className="admin-prop-options">
+                    {prop.optionA} / {prop.optionB}
+                  </span>
+                </div>
+                <div className="admin-prop-actions">
+                  <Button
+                    variant="outline"
+                    className="admin-action-btn"
+                    onClick={() => openEditProp(prop)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="admin-arrow-btn"
+                    onClick={() => handleMoveProp(i, "up")}
+                    disabled={i === 0}
+                  >
+                    <ChevronUp size={20} />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="admin-arrow-btn"
+                    onClick={() => handleMoveProp(i, "down")}
+                    disabled={i === sortedProps.length - 1}
+                  >
+                    <ChevronDown size={20} />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
         </TabsContent>
 
         <TabsContent value="scoring">
-          <p className="admin-placeholder">Scoring panel coming soon.</p>
+          <div className="admin-scoring-list">
+            {sortedProps.map((prop, i) => (
+              <div key={prop.id} className="admin-scoring-row">
+                <div className="admin-scoring-info">
+                  <span className="admin-prop-order">{i + 1}</span>
+                  <span className="admin-prop-question">{prop.question}</span>
+                </div>
+                <div className="admin-scoring-buttons">
+                  <Button
+                    variant={prop.correctAnswer === "A" ? "default" : "outline"}
+                    className={`admin-score-btn ${prop.correctAnswer === "A" ? "admin-score-active" : ""}`}
+                    onClick={() => handleScore(prop.id, prop.correctAnswer === "A" ? null : "A")}
+                  >
+                    {prop.optionA}
+                  </Button>
+                  <Button
+                    variant={prop.correctAnswer === "B" ? "default" : "outline"}
+                    className={`admin-score-btn ${prop.correctAnswer === "B" ? "admin-score-active" : ""}`}
+                    onClick={() => handleScore(prop.id, prop.correctAnswer === "B" ? null : "B")}
+                  >
+                    {prop.optionB}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="admin-scoring-leaderboard">
+            <h3 className="admin-section-title">Live Leaderboard</h3>
+            <Leaderboard entries={leaderboard} />
+          </div>
         </TabsContent>
 
         <TabsContent value="settings">
-          <p className="admin-placeholder">Settings coming soon.</p>
+          {/* Event name */}
+          <div className="admin-settings-section">
+            <h3 className="admin-section-title">Event Name</h3>
+            <div className="admin-add-form">
+              <Input
+                className="admin-add-input"
+                value={eventName}
+                onChange={(e) => setEventName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleEventNameSave()
+                }}
+              />
+              <Button className="admin-add-btn" onClick={handleEventNameSave}>
+                Save
+              </Button>
+            </div>
+          </div>
+
+          {/* Reset controls */}
+          <div className="admin-settings-section">
+            <h3 className="admin-section-title">Reset Controls</h3>
+            <div className="admin-reset-grid">
+              <Button
+                variant="destructive"
+                className="admin-reset-btn"
+                onClick={() => setConfirmAction({
+                  title: "Clear all picks?",
+                  description: "This will erase all friends' picks. Are you sure?",
+                  confirmLabel: "Clear Picks",
+                  variant: "destructive",
+                  onConfirm: () => { clearAllPicks(); refresh() },
+                })}
+              >
+                Clear Picks
+              </Button>
+              <Button
+                variant="destructive"
+                className="admin-reset-btn"
+                onClick={() => setConfirmAction({
+                  title: "Clear all results?",
+                  description: "This will clear all correct answers. Are you sure?",
+                  confirmLabel: "Clear Results",
+                  variant: "destructive",
+                  onConfirm: () => { clearAllResults(); refresh() },
+                })}
+              >
+                Clear Results
+              </Button>
+              <Button
+                variant="destructive"
+                className="admin-reset-btn"
+                onClick={() => setConfirmAction({
+                  title: "Clear all friends?",
+                  description: "This will remove all friends and their picks. Are you sure?",
+                  confirmLabel: "Clear Friends",
+                  variant: "destructive",
+                  onConfirm: () => { clearAllFriends(); refresh() },
+                })}
+              >
+                Clear Friends
+              </Button>
+              <Button
+                variant="destructive"
+                className="admin-reset-btn"
+                onClick={() => setConfirmAction({
+                  title: "Reset all props?",
+                  description: "This will restore the default 25 props and clear all picks and results. Are you sure?",
+                  confirmLabel: "Clear Props",
+                  variant: "destructive",
+                  onConfirm: () => { clearAllProps(); refresh() },
+                })}
+              >
+                Clear Props
+              </Button>
+            </div>
+          </div>
+
+          {/* Backup & Restore */}
+          <div className="admin-settings-section">
+            <h3 className="admin-section-title">Backup &amp; Restore</h3>
+            <div className="admin-backup-row">
+              <Button variant="outline" className="admin-action-btn" onClick={handleDownloadBackup}>
+                Download Backup
+              </Button>
+              <Button variant="outline" className="admin-action-btn" onClick={() => fileInputRef.current?.click()}>
+                Restore Backup
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                className="admin-file-input"
+                onChange={handleRestoreFile}
+              />
+            </div>
+          </div>
+
+          {/* CSV Exports */}
+          <div className="admin-settings-section">
+            <h3 className="admin-section-title">CSV Exports</h3>
+            <div className="admin-backup-row">
+              <Button variant="outline" className="admin-action-btn" onClick={handleExportPicksCSV}>
+                Export Picks Matrix
+              </Button>
+              <Button variant="outline" className="admin-action-btn" onClick={handleExportLeaderboardCSV}>
+                Export Leaderboard
+              </Button>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
 
@@ -263,6 +587,55 @@ export default function AdminPage() {
               Cancel
             </Button>
             <Button className="confirm-dialog-confirm" onClick={handleRenameSubmit}>
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit prop dialog */}
+      <Dialog
+        open={editProp !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditProp(null)
+        }}
+      >
+        <DialogContent className="confirm-dialog">
+          <DialogHeader>
+            <DialogTitle className="confirm-dialog-title">Edit Prop</DialogTitle>
+            <DialogDescription className="admin-edit-warning">
+              Editing this prop will clear all picks and results for it.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="admin-edit-fields">
+            <Input
+              className="admin-add-input"
+              placeholder="Question"
+              value={editQuestion}
+              onChange={(e) => setEditQuestion(e.target.value)}
+            />
+            <Input
+              className="admin-add-input"
+              placeholder="Option A"
+              value={editOptionA}
+              onChange={(e) => setEditOptionA(e.target.value)}
+            />
+            <Input
+              className="admin-add-input"
+              placeholder="Option B"
+              value={editOptionB}
+              onChange={(e) => setEditOptionB(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className="confirm-dialog-cancel"
+              onClick={() => setEditProp(null)}
+            >
+              Cancel
+            </Button>
+            <Button className="confirm-dialog-confirm" onClick={handleEditPropSubmit}>
               Save
             </Button>
           </DialogFooter>
