@@ -1,0 +1,488 @@
+# Super Bowl Prop Picker — Implementation Guide
+
+A step-by-step plan for building a single-device, party-style Super Bowl prop betting app.
+
+---
+
+## Tech Stack
+
+- **Next.js** (App Router)
+- **React** (with hooks for state)
+- **Tailwind CSS** (styling)
+- **shadcn/ui** (component library)
+- **localStorage** (persistence — no backend)
+
+---
+
+## Pre-Styled Design
+
+The app will arrive with a pre-built design/theme. **Do not redesign or restyle the app.** Preserve all existing CSS, colors, spacing, and component styling as-is. Implementation work should focus on logic and wiring — not visual changes.
+
+---
+
+## Phase 0: Project Setup
+
+### Step 0.1 — Scaffold the project
+
+```bash
+npx create-next-app@latest super-bowl-props --typescript --tailwind --eslint --app --src-dir
+cd super-bowl-props
+```
+
+### Step 0.2 — Install shadcn/ui
+
+```bash
+npx shadcn@latest init
+```
+
+When prompted, choose the defaults. Then install the components you'll need up front:
+
+```bash
+npx shadcn@latest add button card dialog input label badge scroll-area separator tabs
+```
+
+### Step 0.3 — Create the folder structure
+
+```
+src/
+  app/
+    layout.tsx              # Root layout
+    page.tsx                # Home — friend selection + leaderboard
+    friend/[id]/page.tsx    # Prop picking screen for a friend
+    admin/page.tsx          # Admin panel
+  components/
+    FriendCard.tsx
+    PropQuestion.tsx
+    Leaderboard.tsx
+    PropEditor.tsx
+    ConfirmDialog.tsx
+  lib/
+    store.ts                # All localStorage read/write logic
+    types.ts                # TypeScript interfaces
+    defaultProps.ts         # The 25 default prop questions
+    defaultFriends.ts       # The initial friend list
+    utils.ts                # Helpers (CSV export, backup/restore, scoring)
+```
+
+### Step 0.4 — Define your types (`lib/types.ts`)
+
+Create these interfaces. Everything else in the app will reference them.
+
+```typescript
+export interface Prop {
+  id: string;          // Permanent UUID — never changes even if reordered
+  question: string;
+  optionA: string;
+  optionB: string;
+  correctAnswer: "A" | "B" | null;  // null = unresolved
+  order: number;       // Display order (0-indexed)
+}
+
+export interface Friend {
+  id: string;          // UUID
+  name: string;
+  picks: Record<string, "A" | "B">;  // key = prop.id, value = their pick
+}
+
+export interface AppState {
+  eventName: string;
+  props: Prop[];
+  friends: Friend[];
+}
+```
+
+### Step 0.5 — Create the default props (`lib/defaultProps.ts`)
+
+Hardcode these 25 props. Give each a stable `id` (use `crypto.randomUUID()` at dev time, then paste the resulting strings so they're fixed). Set `correctAnswer: null` for all. Set `order` from 0–24.
+
+| # | Question | Option A | Option B |
+|---|---|---|---|
+| 1 | Length of National Anthem (in seconds) | Over 120 | Under 120 |
+| 2 | Coin toss result | Heads | Tails |
+| 3 | Game winner | Seahawks | Patriots |
+| 4 | Game total | Over 45.5 | Under 45.5 |
+| 5 | First offensive play of the game | Rushing attempt | Passing attempt |
+| 6 | Will there be a scoreless quarter | Yes | No |
+| 7 | Team to score first | Seahawks | Patriots |
+| 8 | First team to call a timeout | Seahawks | Patriots |
+| 9 | First accepted penalty will be against | Seahawks | Patriots |
+| 10 | Will there be overtime? | Yes | No |
+| 11 | Will a team score 3 consecutive times (not incl PATs) | Yes | No |
+| 12 | Sam Darnold passing yards | Over 230.5 | Under 230.5 |
+| 13 | Drake Maye passing yards | Over 220.5 | Under 220.5 |
+| 14 | Total receiving yards - Jaxon Smith-Njigba | Over 93.5 | Under 93.5 |
+| 15 | Total receiving yards - Stephon Diggs | Over 43.5 | Under 43.5 |
+| 16 | Total rushing yards - Kenneth Walker III | Over 42.5 | Under 42.5 |
+| 17 | Team with the longest successful field goal | Seahawks | Patriots |
+| 18 | Length of longest touchdown (in yards) | Over 36.5 | Under 36.5 |
+| 19 | Team with longest touchdown | Seahawks | Patriots |
+| 20 | Total game score | Odd | Even |
+| 21 | Highest scoring half | First | Second |
+| 22 | Total number of touchdowns in the game | Over 5.5 | Under 5.5 |
+| 23 | Will there be a missed PAT (1 or 2 pt attempt) | Yes | No |
+| 24 | Color of Gatorade bath | Orange/Water/Clear | Any other color |
+| 25 | Position of Superbowl MVP | Quarterback | Any other position |
+
+### Step 0.6 — Create the default friends (`lib/defaultFriends.ts`)
+
+Hardcode these 15 friends as the initial set. Each gets a UUID and empty `picks: {}`.
+
+```typescript
+const DEFAULT_FRIEND_NAMES = [
+  "Mike", "Giovi", "Angie", "Edward", "Sam",
+  "Gigi", "Ryan", "Daniella", "Dean", "Julz",
+  "Izzy", "Mac", "Jax", "Hanna", "Madison"
+];
+```
+
+These are pre-loaded on first launch. The host can add, rename, or delete friends at any time. There is no hard cap on the number of friends — the app should handle any reasonable number.
+
+### Step 0.7 — Initializing state on first load
+
+When `getState()` finds no existing data in localStorage:
+
+1. Generate the 25 default props.
+2. Generate the 15 default friends.
+3. Set `eventName` to `"Super Bowl LIX Props"`.
+4. Save to localStorage.
+
+On subsequent loads, always use the stored state.
+
+> **Checkpoint:** You should be able to run `npm run dev`, see the Next.js welcome page, and import your types, default props, and default friends without errors.
+
+---
+
+## Phase 1: localStorage State Management (`lib/store.ts`)
+
+Build this module **before** building any UI. Every component will depend on it.
+
+### Step 1.1 — Initialize state
+
+Write a function `getState(): AppState` that:
+
+1. Reads from `localStorage` key `"sbProps"`.
+2. If nothing exists, returns a default state with the 25 default props, the 15 default friends, and the default event name.
+3. Parses and returns the stored JSON otherwise.
+
+### Step 1.2 — Save state
+
+Write a function `saveState(state: AppState): void` that serializes the full state to `localStorage`.
+
+### Step 1.3 — Build helper functions
+
+Each of these reads state, modifies it, and saves it back. Build them one at a time and test with `console.log` in the browser console.
+
+**Friends:**
+
+| Function | Behavior |
+|---|---|
+| `addFriend(name: string)` | Creates a new `Friend` with a UUID, empty picks, and the given name. No upper limit on count. |
+| `renameFriend(id: string, name: string)` | Updates the friend's name. |
+| `deleteFriend(id: string)` | Removes the friend entirely. |
+| `resetFriendPicks(id: string)` | Sets the friend's `picks` to `{}`. |
+
+**Picks:**
+
+| Function | Behavior |
+|---|---|
+| `setPick(friendId, propId, value)` | Sets `friend.picks[propId] = value`. |
+| `isFriendComplete(friendId)` | Returns `true` only if the friend has a pick for every prop (all 25). |
+
+**Props:**
+
+| Function | Behavior |
+|---|---|
+| `updateProp(id, question, optionA, optionB)` | Updates the prop text. **Also clears** that prop's `correctAnswer` to `null` AND removes that prop's key from every friend's `picks`. |
+| `reorderProps(orderedIds: string[])` | Takes an array of prop IDs in the new order and updates each prop's `order` field. Does **not** clear any picks. |
+| `setCorrectAnswer(propId, value)` | Sets `correctAnswer` to `"A"`, `"B"`, or `null`. |
+
+**Scoring:**
+
+| Function | Behavior |
+|---|---|
+| `getLeaderboard()` | Returns an array of `{ name, correct, scored, accuracy }` sorted by `correct` descending. `scored` = number of props with a `correctAnswer` set. `correct` = number of those where the friend's pick matches. `accuracy` = `correct / scored` (handle divide-by-zero — show 0% or "–"). |
+
+**Bulk resets:**
+
+| Function | Behavior |
+|---|---|
+| `clearAllPicks()` | Resets every friend's `picks` to `{}`. |
+| `clearAllResults()` | Sets every prop's `correctAnswer` to `null`. |
+| `clearAllFriends()` | Removes all friends. |
+| `clearAllProps()` | Replaces `props` with the default 25. Clears all picks and results. Keeps friends and event name. |
+
+**Backup/Restore:**
+
+| Function | Behavior |
+|---|---|
+| `exportBackup()` | Returns the full `AppState` as a JSON string. |
+| `importBackup(json: string)` | Parses and saves. Overwrites everything. |
+
+> **Checkpoint:** Open the browser console. Call `addFriend("TestPerson")`, `setPick(...)`, `getLeaderboard()`. Verify the 15 default friends exist. Verify data persists across page reloads.
+
+---
+
+## Phase 2: Home Screen (Friend Selection + Leaderboard)
+
+**File:** `app/page.tsx`
+
+This is the first thing anyone sees when the app opens.
+
+### Step 2.1 — Layout
+
+- Display the event name as a header (e.g., "Super Bowl LIX Props").
+- Two main sections visible from the home screen:
+  - **Friend selection grid** — the primary view.
+  - **Leaderboard** — visible to everyone (not admin-only).
+- A small settings/gear icon button in the top corner that links to `/admin`.
+- A **Leaderboard** button (e.g., trophy icon) also in the top area that scrolls to or toggles the leaderboard section.
+
+### Step 2.2 — Friend selection grid
+
+Show all friends in a responsive grid. Each card shows:
+
+- The friend's name (large text).
+- A status badge: **Complete** (green) or **In Progress** or **Not Started**.
+  - Not Started = 0 picks.
+  - In Progress = 1–24 picks.
+  - Complete = 25 picks.
+- Tapping the card navigates to `/friend/[id]`.
+
+The grid should handle 15+ friends comfortably and scroll if needed. No pagination — just a scrollable grid.
+
+### Step 2.3 — Completion guard
+
+When a friend's card is tapped and they are already **Complete**, show a confirmation dialog: _"[Name]'s picks are already complete. Do you want to review/edit them?"_ with Cancel and Continue buttons.
+
+If they are not complete, navigate directly.
+
+### Step 2.4 — Public leaderboard
+
+Show the `Leaderboard` component on the home screen. This is the same leaderboard data from `getLeaderboard()` — a table showing each friend's name, correct count, scored count, and accuracy. It updates whenever the page is loaded.
+
+This lets party guests check standings without going into admin.
+
+> **Checkpoint:** You should see all 15 default friends in a grid, tap one, and land on the picking page. The leaderboard section should be visible (empty until props are scored). The Complete badge should work correctly.
+
+---
+
+## Phase 3: Prop Picking Screen
+
+**File:** `app/friend/[id]/page.tsx`
+
+This is the core of the app — where a friend fills out their 25 picks.
+
+### Step 3.1 — Layout
+
+- Header: show the friend's name prominently ("Making picks for: **Alice**").
+- A "Back" button/link to return to the home screen.
+- Below the header: a single scrollable list of all 25 prop questions, in order.
+
+### Step 3.2 — `PropQuestion` component
+
+For each prop, render:
+
+- The question number and text (e.g., "1. Length of National Anthem (in seconds)").
+- Two large, tappable buttons side by side: one for Option A, one for Option B.
+- The currently selected option should be visually highlighted (e.g., solid fill color). The unselected option should be outlined/muted.
+- If neither is selected yet, both buttons are in a neutral/unselected state.
+
+### Step 3.3 — Instant saving
+
+When a friend taps an option:
+
+1. Call `setPick(friendId, propId, "A" or "B")` immediately.
+2. Update the local component state so the highlight appears instantly (don't wait for a re-read from localStorage).
+
+There is no "Submit" button. Picks auto-save.
+
+### Step 3.4 — Progress indicator
+
+Show a progress bar or counter at the top: `"17 of 25 answered"`. Update it live as they tap.
+
+### Step 3.5 — Scroll UX
+
+Unanswered props should be visually distinct (e.g., a subtle left border or background tint) so the friend can quickly scan for ones they missed.
+
+> **Checkpoint:** Open a friend's page, tap through all 25 props, go back to the home screen, and confirm the friend shows as Complete. Reopen — picks should still be there.
+
+---
+
+## Phase 4: Admin Panel
+
+**File:** `app/admin/page.tsx`
+
+No PIN or protection needed — this is a trusted party setting. Use a tabbed layout (shadcn `Tabs`) with these tabs:
+
+### Tab 1: Friends
+
+#### Step 4.1 — Add a friend
+
+- Text input + "Add" button.
+- Validate: no empty names, no duplicate names.
+- No upper limit — the host can add as many friends as they want.
+
+#### Step 4.2 — Friend list
+
+For each friend, show:
+
+- Name
+- Status (Complete / In Progress / Not Started)
+- A "Rename" button → opens an inline edit or dialog.
+- A "Reset Picks" button → confirmation dialog → calls `resetFriendPicks(id)`.
+- A "Delete" button → confirmation dialog → calls `deleteFriend(id)`.
+
+### Tab 2: Props
+
+#### Step 4.3 — Prop list with editing
+
+Display all 25 props in their current order. Each prop row shows:
+
+- Order number (1–25)
+- Question text
+- Option A / Option B labels
+- An "Edit" button → opens a dialog with fields for question, option A, option B.
+  - **Important:** On save, call `updateProp(...)` which clears picks and results for that prop. Show a warning in the dialog: _"Editing this prop will clear all picks and results for it."_
+
+#### Step 4.4 — Drag-and-drop reorder
+
+Use a lightweight drag-and-drop approach. Options:
+
+- **Recommended for simplicity:** Up/Down arrow buttons on each prop row. No library needed.
+- **If you want real drag-and-drop:** Use `@dnd-kit/core` and `@dnd-kit/sortable`.
+
+On reorder, call `reorderProps(newOrderedIds)`. This does **not** clear any picks.
+
+### Tab 3: Scoring
+
+#### Step 4.5 — Score each prop
+
+List all 25 props. For each, show:
+
+- The question
+- Three buttons: **Option A label** / **Option B label** / **Unset**
+- Highlight the currently selected correct answer.
+
+When tapped, call `setCorrectAnswer(propId, value)`.
+
+#### Step 4.6 — Leaderboard (admin view)
+
+Below the scoring list (or as a sub-section), show the live leaderboard. Same data as the public leaderboard on the home screen. This should re-render whenever a correct answer is set, so the host can see standings update in real time as they score.
+
+### Tab 4: Settings
+
+#### Step 4.7 — Event name
+
+A text input to change the event name displayed on the home screen.
+
+#### Step 4.8 — Reset controls
+
+Four separate buttons, each with its own confirmation dialog:
+
+| Button | Action | Dialog message |
+|---|---|---|
+| Clear Picks | `clearAllPicks()` | "This will erase all friends' picks. Are you sure?" |
+| Clear Results | `clearAllResults()` | "This will clear all correct answers. Are you sure?" |
+| Clear Friends | `clearAllFriends()` | "This will remove all friends and their picks. Are you sure?" |
+| Clear Props | `clearAllProps()` | "This will restore the default 25 props and clear all picks and results. Are you sure?" |
+
+**Do not** add a "Reset Everything" button.
+
+#### Step 4.9 — Backup & Restore
+
+- **Download Backup** button: calls `exportBackup()`, creates a Blob, and triggers a file download (`super-bowl-props-backup.json`).
+- **Restore Backup** button: opens a file picker for `.json`. On file load, shows a confirmation dialog (_"This will overwrite all current data. Continue?"_), then calls `importBackup(json)`.
+
+#### Step 4.10 — CSV Exports
+
+Two export buttons:
+
+**Picks Matrix CSV:**
+
+- Rows = props (in order)
+- Columns: `Question`, `Option A`, `Option B`, `Correct Answer`, then one column per friend
+- Each friend's cell shows the **full label** of their pick (not "A"/"B")
+- If no pick, show empty
+
+**Leaderboard CSV:**
+
+- Columns: `Name`, `Correct`, `Scored`, `Accuracy`
+- One row per friend, sorted by correct descending
+
+For both: generate a CSV string, create a Blob, and trigger a download.
+
+> **Checkpoint:** You should be able to add friends beyond the initial 15, edit props (and see picks cleared for that prop), score props, see the leaderboard update on both admin and home screen, export CSVs, and backup/restore the full app.
+
+---
+
+## Phase 5: Polish & Party-Proofing
+
+### Step 5.1 — Preserve existing styles
+
+A pre-built theme/design will be in place before implementation begins. **Do not change any existing styles, colors, fonts, or spacing.** All implementation work should use the existing CSS classes and component patterns.
+
+### Step 5.2 — Large tap targets
+
+- All tappable buttons should be at least `48px` tall (Tailwind: `h-12` minimum).
+- Prop option buttons should be even larger — aim for `h-14` or `h-16` with generous padding.
+- Friend cards on the home screen should be large and easy to tap.
+
+### Step 5.3 — iPad optimization
+
+- Test at iPad screen widths (~768px–1024px).
+- Friend selection grid: 2–3 columns on iPad, 1 column on phone.
+- Prop list: keep it single-column and full-width for readability.
+- Admin tabs: should work comfortably on both.
+
+### Step 5.4 — Offline support
+
+Since there's no backend, the app works offline after the initial load by default. No additional PWA configuration is needed for v1.
+
+### Step 5.5 — Error boundaries
+
+Wrap the app in a React error boundary that shows a friendly message and a "Restore from Backup" option if the app state gets corrupted.
+
+### Step 5.6 — `ConfirmDialog` component
+
+Build a reusable confirmation dialog (using shadcn `Dialog`) that accepts:
+
+- `title: string`
+- `description: string`
+- `confirmLabel: string` (e.g., "Delete", "Clear", "Restore")
+- `onConfirm: () => void`
+- `variant: "default" | "destructive"` (red button for destructive actions)
+
+Use this everywhere you need confirmation.
+
+---
+
+## Recommended Build Order (Summary)
+
+| Order | What | Est. Time |
+|---|---|---|
+| 1 | Phase 0: Setup, types, default props, default friends | 1–2 hours |
+| 2 | Phase 1: `store.ts` — all localStorage logic | 3–4 hours |
+| 3 | Phase 2: Home page + friend grid + public leaderboard | 2–3 hours |
+| 4 | Phase 3: Prop picking screen | 3–4 hours |
+| 5 | Phase 4, Tab 1: Admin — Friends management | 2–3 hours |
+| 6 | Phase 4, Tab 2: Admin — Props editing & reorder | 3–4 hours |
+| 7 | Phase 4, Tab 3: Admin — Scoring + Leaderboard | 2–3 hours |
+| 8 | Phase 4, Tab 4: Admin — Settings, resets, backup, exports | 3–4 hours |
+| 9 | Phase 5: Polish, tap targets, iPad testing | 2–3 hours |
+
+**Total estimate: ~20–30 hours** for a junior dev, depending on familiarity with the stack.
+
+---
+
+## Key Rules to Remember
+
+1. **Don't change the styles.** A pre-built design will be in place. Keep it as-is.
+2. **Props have permanent IDs.** Never use array index as an identifier. Always use `prop.id`.
+3. **Editing a prop clears its picks and result.** Reordering does not.
+4. **No "nuke everything" button.** The four reset actions are always separate.
+5. **No submit button for picks.** Saves happen on every tap.
+6. **Complete = all 25 answered.** Not 24. Not "most." All 25.
+7. **Leaderboard sorts by correct count.** Ties are fine — no tiebreaker logic needed.
+8. **No friend limit.** The app should handle any reasonable number of friends.
+9. **No admin protection.** No PIN, no password. It's a trusted party setting.
+10. **Test with localStorage.** Open DevTools → Application → Local Storage to inspect your data as you build.

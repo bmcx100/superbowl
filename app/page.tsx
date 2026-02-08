@@ -1,129 +1,115 @@
+"use client"
+
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Navbar } from "@/components/navbar"
+import { Footer } from "@/components/footer"
+
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black">
-      <main className="flex w-full max-w-2xl flex-col gap-8 px-6 py-12">
-        {/* Header */}
-        <div className="flex flex-col gap-4 text-center">
-          <div className="flex items-center justify-center gap-3">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-2xl font-bold text-white shadow-lg">
-              BMC
-            </div>
-            <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-              Reactest Template
-            </h1>
-          </div>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            A modern Next.js starter with TypeScript, Tailwind CSS, and
-            shadcn/ui
-          </p>
+    <div className="page-root">
+      <Navbar />
+
+      <div className="splash-root">
+        {/* Animated background layers */}
+        <div className="splash-bg" />
+        <div className="splash-radial" />
+        <div className="splash-noise" />
+        <div className="splash-vignette" />
+
+        {/* Floating yard-line decorations */}
+        <div className="yard-lines" aria-hidden="true">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="yard-line" style={{ "--i": i } as React.CSSProperties} />
+          ))}
         </div>
 
-        {/* Setup Instructions Card */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
-          <h2 className="mb-6 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-            Quick Start Guide
-          </h2>
+        {/* Main content */}
+        <main className="splash-content">
+          {/* Top badge */}
+          <div className="splash-badge">
+            <span className="badge-text">SUPER BOWL LX</span>
+            <span className="badge-divider" />
+            <span className="badge-sub">PROP PICKS</span>
+          </div>
 
-          <div className="flex flex-col gap-4">
-            {/* Step 1 */}
-            <div className="flex gap-4">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-500 text-sm font-semibold text-white">
-                1
-              </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="font-medium text-zinc-900 dark:text-zinc-50">
-                  Navigate to your project
-                </h3>
-                <code className="rounded-lg bg-zinc-100 px-4 py-3 text-sm font-mono text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
-                  cd new_proj
-                </code>
-              </div>
+          {/* Hero image area */}
+          <div className="hero-section">
+            <div className="hero-glow" />
+
+            <div className="hero-image-wrapper">
+              <Image
+                src="/images/helmets.jpg"
+                alt="Seattle Seahawks vs New England Patriots helmets at Levi's Stadium"
+                width={900}
+                height={506}
+                priority
+                className="hero-image"
+              />
+              <div className="hero-image-fade" />
             </div>
 
-            {/* Step 2 */}
-            <div className="flex gap-4">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-purple-500 text-sm font-semibold text-white">
-                2
-              </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="font-medium text-zinc-900 dark:text-zinc-50">
-                  Install dependencies
-                </h3>
-                <code className="rounded-lg bg-zinc-100 px-4 py-3 text-sm font-mono text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
-                  npm install
-                </code>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="flex gap-4">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-green-500 text-sm font-semibold text-white">
-                3
-              </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="font-medium text-zinc-900 dark:text-zinc-50">
-                  Start development server
-                </h3>
-                <code className="rounded-lg bg-zinc-100 px-4 py-3 text-sm font-mono text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
-                  npm run dev
-                </code>
-              </div>
+            {/* VS overlay */}
+            <div className="vs-badge">
+              <span>VS</span>
             </div>
           </div>
-        </div>
 
-        {/* Features Grid */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="mb-2 text-2xl">⚡</div>
-            <h3 className="mb-1 font-semibold text-zinc-900 dark:text-zinc-50">
-              Next.js 16
-            </h3>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              App Router with React 19 and Server Components
-            </p>
+          {/* Team names */}
+          <div className="matchup-bar">
+            <div className="team team-left">
+              <div className="team-city">SEATTLE</div>
+              <div className="team-name seahawks-name">SEAHAWKS</div>
+            </div>
+            <div className="matchup-divider">
+              <div className="divider-diamond" />
+            </div>
+            <div className="team team-right">
+              <div className="team-city">NEW ENGLAND</div>
+              <div className="team-name patriots-name">PATRIOTS</div>
+            </div>
           </div>
 
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="mb-2 text-2xl">🎨</div>
-            <h3 className="mb-1 font-semibold text-zinc-900 dark:text-zinc-50">
-              Tailwind CSS v4
-            </h3>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Modern styling with shadcn/ui components
-            </p>
+          {/* Game info strip */}
+          <div className="game-info">
+            <div className="info-item">
+              <span className="info-label">DATE</span>
+              <span className="info-value">FEB 9, 2025</span>
+            </div>
+            <div className="info-sep" />
+            <div className="info-item">
+              <span className="info-label">VENUE</span>
+              <span className="info-value">CAESARS SUPERDOME</span>
+            </div>
+            <div className="info-sep" />
+            <div className="info-item">
+              <span className="info-label">LOCATION</span>
+              <span className="info-value">NEW ORLEANS, LA</span>
+            </div>
           </div>
 
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="mb-2 text-2xl">📘</div>
-            <h3 className="mb-1 font-semibold text-zinc-900 dark:text-zinc-50">
-              TypeScript
-            </h3>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Fully typed codebase with strict mode
-            </p>
+          {/* SB Logo */}
+          <div className="sb-logo-row">
+            <Image
+              src="/images/SB-LX1.webp"
+              alt="Super Bowl LX Logo"
+              width={180}
+              height={135}
+              className="sb-logo"
+            />
           </div>
 
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="mb-2 text-2xl">🌙</div>
-            <h3 className="mb-1 font-semibold text-zinc-900 dark:text-zinc-50">
-              Dark Mode
-            </h3>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Built-in dark mode with OKLCH colors
-            </p>
+          {/* CTA */}
+          <div className="cta-area">
+            <Button className="cta-button">
+              MAKE YOUR PICKS
+            </Button>
+            <p className="cta-sub">Free to play &bull; Bragging rights guaranteed</p>
           </div>
-        </div>
+        </main>
+      </div>
 
-        {/* Footer */}
-        <p className="text-center text-sm text-zinc-500 dark:text-zinc-500">
-          Edit{" "}
-          <code className="rounded bg-zinc-200 px-2 py-1 font-mono text-xs dark:bg-zinc-800">
-            app/page.tsx
-          </code>{" "}
-          to get started
-        </p>
-      </main>
+      <Footer />
     </div>
-  );
+  )
 }
