@@ -13,8 +13,8 @@ export function Navbar() {
     <nav className="navbar">
       <div className="nav-ticker" aria-hidden="true">
         <div className="ticker-track">
-          <span>SUPER BOWL LX &bull; SEAHAWKS VS PATRIOTS &bull; FEB 9, 2025 &bull; CAESARS SUPERDOME &bull; NEW ORLEANS, LA &bull;&nbsp;</span>
-          <span>SUPER BOWL LX &bull; SEAHAWKS VS PATRIOTS &bull; FEB 9, 2025 &bull; CAESARS SUPERDOME &bull; NEW ORLEANS, LA &bull;&nbsp;</span>
+          <span>SUPER BOWL LX &bull; SEAHAWKS VS PATRIOTS &bull; FEB 8, 2026 &bull; LEVI'S STADIUM &bull; SANTA CLARA, CA &bull;&nbsp;</span>
+          <span>SUPER BOWL LX &bull; SEAHAWKS VS PATRIOTS &bull; FEB 8, 2026 &bull; LEVI'S STADIUM &bull; SANTA CLARA, CA &bull;&nbsp;</span>
         </div>
       </div>
 

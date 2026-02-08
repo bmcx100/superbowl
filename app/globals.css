@@ -967,7 +967,72 @@
 
 .leaderboard-name {
   font-weight: 600 !important;
+  font-size: 1.6rem !important;
   color: #ffffff !important;
+}
+
+/* --- Podium: top 3 rows --- */
+.leaderboard-top1 {
+  background: rgba(230, 0, 126, 0.2);
+  border-left: 4px solid var(--sb-magenta);
+}
+
+.leaderboard-top1 td {
+  font-size: 1.4rem !important;
+  color: #ffffff !important;
+}
+
+.leaderboard-top1 .leaderboard-name {
+  font-size: 2rem !important;
+  color: #ffffff !important;
+}
+
+.leaderboard-top1 .leaderboard-rank {
+  color: #ffffff !important;
+  font-size: 1.6rem !important;
+  font-weight: 700;
+}
+
+.leaderboard-top2 {
+  background: rgba(0, 200, 240, 0.15);
+  border-left: 4px solid var(--sb-cyan);
+}
+
+.leaderboard-top2 td {
+  font-size: 1.25rem !important;
+  color: #ffffff !important;
+}
+
+.leaderboard-top2 .leaderboard-name {
+  font-size: 1.8rem !important;
+  color: #ffffff !important;
+}
+
+.leaderboard-top2 .leaderboard-rank {
+  color: #ffffff !important;
+  font-size: 1.4rem !important;
+  font-weight: 700;
+}
+
+.leaderboard-top3 {
+  background: rgba(139, 197, 63, 0.15);
+  border-left: 4px solid var(--sb-green);
+}
+
+.leaderboard-top3 td {
+  font-size: 1.15rem !important;
+  color: #ffffff !important;
+}
+
+.leaderboard-top3 .leaderboard-name {
+  font-size: 1.7rem !important;
+  color: #ffffff !important;
+}
+
+.leaderboard-top3 .leaderboard-rank {
+  color: #ffffff !important;
+  font-size: 1.3rem !important;
+  font-weight: 700;
 }
 
 .leaderboard-empty {
@@ -1961,6 +2026,36 @@
 
 .light .leaderboard-name {
   color: #1a1d24 !important;
+}
+
+.light .leaderboard-top1 {
+  background: rgba(230, 0, 126, 0.12);
+}
+
+.light .leaderboard-top1 td,
+.light .leaderboard-top1 .leaderboard-name,
+.light .leaderboard-top1 .leaderboard-rank {
+  color: #c70068 !important;
+}
+
+.light .leaderboard-top2 {
+  background: rgba(0, 200, 240, 0.1);
+}
+
+.light .leaderboard-top2 td,
+.light .leaderboard-top2 .leaderboard-name,
+.light .leaderboard-top2 .leaderboard-rank {
+  color: #0080a0 !important;
+}
+
+.light .leaderboard-top3 {
+  background: rgba(139, 197, 63, 0.12);
+}
+
+.light .leaderboard-top3 td,
+.light .leaderboard-top3 .leaderboard-name,
+.light .leaderboard-top3 .leaderboard-rank {
+  color: #4a7a10 !important;
 }
 
 .light .leaderboard-empty {

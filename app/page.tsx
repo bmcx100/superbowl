@@ -75,17 +75,17 @@ export default function Home() {
           <div className="game-info">
             <div className="info-item">
               <span className="info-label">DATE</span>
-              <span className="info-value">FEB 9, 2025</span>
+              <span className="info-value">FEB 8, 2026</span>
             </div>
             <div className="info-sep" />
             <div className="info-item">
               <span className="info-label">VENUE</span>
-              <span className="info-value">CAESARS SUPERDOME</span>
+              <span className="info-value">LEVI'S STADIUM</span>
             </div>
             <div className="info-sep" />
             <div className="info-item">
               <span className="info-label">LOCATION</span>
-              <span className="info-value">NEW ORLEANS, LA</span>
+              <span className="info-value">SANTA CLARA, CA</span>
             </div>
           </div>
 

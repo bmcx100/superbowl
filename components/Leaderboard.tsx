@@ -22,25 +22,26 @@ export function Leaderboard({ entries }: LeaderboardProps) {
           <tr>
             <th>#</th>
             <th>Name</th>
-            <th>Correct</th>
-            <th>Scored</th>
+            <th>Score</th>
             <th>Accuracy</th>
           </tr>
         </thead>
         <tbody>
-          {entries.map((entry, i) => (
-            <tr key={entry.name}>
-              <td className="leaderboard-rank">{i + 1}</td>
-              <td className="leaderboard-name">{entry.name}</td>
-              <td>{entry.correct}</td>
-              <td>{entry.scored}</td>
-              <td>
-                {entry.scored > 0
-                  ? `${Math.round(entry.accuracy * 100)}%`
-                  : "\u2013"}
-              </td>
-            </tr>
-          ))}
+          {entries.map((entry, i) => {
+            const podium = i < 3 ? `leaderboard-top${i + 1}` : ""
+            return (
+              <tr key={entry.name} className={podium}>
+                <td className="leaderboard-rank">{i + 1}</td>
+                <td className="leaderboard-name">{entry.name}</td>
+                <td>{entry.correct}/{entry.scored}</td>
+                <td>
+                  {entry.scored > 0
+                    ? `${Math.round(entry.accuracy * 100)}%`
+                    : "\u2013"}
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>
