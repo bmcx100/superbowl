@@ -1,7 +1,10 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import { useState } from "react"
+import { Settings } from "lucide-react"
+import { ThemeToggle } from "@/components/ThemeToggle"
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -17,31 +20,31 @@ export function Navbar() {
 
       <div className="nav-main">
         <div className="nav-inner">
-          <div className="nav-brand">
+          <Link href="/" className="nav-brand">
             <Image
               src="/images/SB-LX1.webp"
               alt="Super Bowl LX"
-              width={52}
-              height={40}
+              width={72}
+              height={55}
               className="nav-logo"
             />
             <div className="nav-title-group">
               <span className="nav-title">PROP PICKS</span>
               <span className="nav-subtitle">SUPER BOWL LX</span>
             </div>
-          </div>
+          </Link>
 
           <div className="nav-links">
-            <a href="#" className="nav-link nav-link-active">Home</a>
-            <a href="#" className="nav-link">Props</a>
-            <a href="#" className="nav-link">Leaderboard</a>
-            <a href="#" className="nav-link">Rules</a>
+            <Link href="/#friends" className="nav-link">Make Your Picks</Link>
+            <Link href="/#leaderboard" className="nav-link">Leaderboard</Link>
           </div>
 
           <div className="nav-actions">
-            <button className="nav-cta">
-              Sign In
-            </button>
+            <ThemeToggle />
+            <Link href="/admin" className="nav-cta">
+              <Settings size={22} />
+              <span>Admin</span>
+            </Link>
           </div>
 
           <button
@@ -57,11 +60,18 @@ export function Navbar() {
 
         {mobileOpen && (
           <div className="nav-mobile-menu">
-            <a href="#" className="nav-mobile-link nav-link-active">Home</a>
-            <a href="#" className="nav-mobile-link">Props</a>
-            <a href="#" className="nav-mobile-link">Leaderboard</a>
-            <a href="#" className="nav-mobile-link">Rules</a>
-            <button className="nav-mobile-cta">Sign In</button>
+            <Link href="/#friends" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
+              Make Your Picks
+            </Link>
+            <Link href="/#leaderboard" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
+              Leaderboard
+            </Link>
+            <div className="nav-mobile-bottom">
+              <Link href="/admin" className="nav-mobile-cta" onClick={() => setMobileOpen(false)}>
+                Admin
+              </Link>
+              <ThemeToggle />
+            </div>
           </div>
         )}
       </div>

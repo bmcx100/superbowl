@@ -19,16 +19,22 @@ export const metadata: Metadata = {
   description: "Make your Super Bowl LX prop picks — Seahawks vs Patriots",
 }
 
+import { Navbar } from "@/components/navbar"
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{if(localStorage.getItem('theme')==='light')document.documentElement.classList.add('light')}catch(e){}})()` }} />
+      </head>
       <body
         className={`${oswald.variable} ${barlowCondensed.variable} antialiased`}
       >
+        <Navbar />
         {children}
       </body>
     </html>
