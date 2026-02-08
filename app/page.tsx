@@ -1,45 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Footer } from "@/components/footer"
-import { FriendCard } from "@/components/FriendCard"
-import { Leaderboard } from "@/components/Leaderboard"
-import { ConfirmDialog } from "@/components/ConfirmDialog"
-import { getState, getLeaderboard } from "@/lib/store"
-import type { AppState, Friend } from "@/lib/types"
-import type { LeaderboardEntry } from "@/lib/store"
 
 export default function Home() {
   const router = useRouter()
-  const [appState, setAppState] = useState<AppState | null>(null)
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
-  const [confirmFriend, setConfirmFriend] = useState<Friend | null>(null)
-
-  useEffect(() => {
-    setAppState(getState())
-    setLeaderboard(getLeaderboard())
-  }, [])
-
-  const handleFriendClick = (friend: Friend) => {
-    if (!appState) return
-    const pickCount = Object.keys(friend.picks).length
-    if (pickCount >= appState.props.length) {
-      setConfirmFriend(friend)
-    } else {
-      router.push(`/friend/${friend.id}`)
-    }
-  }
-
-  const scrollToFriends = () => {
-    document.getElementById("friends")?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  const scrollToLeaderboard = () => {
-    document.getElementById("leaderboard")?.scrollIntoView({ behavior: "smooth" })
-  }
 
   return (
     <div className="page-root">
@@ -125,10 +92,10 @@ export default function Home() {
           {/* CTA */}
           <div className="cta-area">
             <div className="cta-buttons">
-              <Button className="cta-button" onClick={scrollToFriends}>
+              <Button className="cta-button" onClick={() => router.push("/picks")}>
                 MAKE YOUR PICKS
               </Button>
-              <Button className="cta-button" onClick={scrollToLeaderboard}>
+              <Button className="cta-button" onClick={() => router.push("/leaderboard")}>
                 LEADERBOARD
               </Button>
             </div>
@@ -136,51 +103,6 @@ export default function Home() {
           </div>
         </main>
       </div>
-
-      {/* Friend selection grid */}
-      {appState && (
-        <section id="friends" className="friends-section">
-          <div className="friends-header">
-            <h2 className="friends-title">{appState.eventName}</h2>
-          </div>
-          <div className="friend-grid">
-            {appState.friends.map((friend) => (
-              <FriendCard
-                key={friend.id}
-                friend={friend}
-                totalProps={appState.props.length}
-                onClick={() => handleFriendClick(friend)}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Leaderboard */}
-      {appState && (
-        <section id="leaderboard" className="leaderboard-section">
-          <h2 className="leaderboard-title">Leaderboard</h2>
-          <Leaderboard entries={leaderboard} />
-        </section>
-      )}
-
-      {/* Completion guard dialog */}
-      <ConfirmDialog
-        open={confirmFriend !== null}
-        onOpenChange={(open) => {
-          if (!open) setConfirmFriend(null)
-        }}
-        title={confirmFriend ? `${confirmFriend.name}'s picks are complete` : ""}
-        description={
-          confirmFriend
-            ? `${confirmFriend.name}'s picks are already complete. Do you want to review/edit them?`
-            : ""
-        }
-        confirmLabel="Continue"
-        onConfirm={() => {
-          if (confirmFriend) router.push(`/friend/${confirmFriend.id}`)
-        }}
-      />
 
       <Footer />
     </div>

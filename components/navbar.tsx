@@ -35,8 +35,8 @@ export function Navbar() {
           </Link>
 
           <div className="nav-links">
-            <Link href="/#friends" className="nav-link">Make Your Picks</Link>
-            <Link href="/#leaderboard" className="nav-link">Leaderboard</Link>
+            <Link href="/picks" className="nav-link">Make Your Picks</Link>
+            <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
           </div>
 
           <div className="nav-actions">
@@ -60,10 +60,10 @@ export function Navbar() {
 
         {mobileOpen && (
           <div className="nav-mobile-menu">
-            <Link href="/#friends" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
+            <Link href="/picks" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
               Make Your Picks
             </Link>
-            <Link href="/#leaderboard" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
+            <Link href="/leaderboard" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
               Leaderboard
             </Link>
             <div className="nav-mobile-bottom">

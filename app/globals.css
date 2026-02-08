@@ -371,6 +371,19 @@
   min-height: calc(100vh - 148px);
 }
 
+.splash-root::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  z-index: 10;
+  background: linear-gradient(90deg, transparent, var(--sb-cyan), var(--sb-magenta), transparent);
+  box-shadow: 0 0 40px rgba(0, 200, 240, 0.3);
+}
+
 .splash-bg {
   @apply absolute inset-0;
   background:
@@ -765,6 +778,18 @@
   padding: 80px 40px;
 }
 
+.friends-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--sb-cyan), var(--sb-magenta), transparent);
+  box-shadow: 0 0 40px rgba(0, 200, 240, 0.3);
+}
+
 .friends-header {
   @apply flex items-center justify-between mx-auto;
   max-width: 1400px;
@@ -876,6 +901,18 @@
   background: var(--sb-surface);
   padding: 80px 40px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--sb-cyan), var(--sb-magenta), transparent);
+  box-shadow: 0 0 40px rgba(0, 200, 240, 0.3);
 }
 
 .leaderboard-title {
@@ -1274,11 +1311,27 @@
    PROP PICKING PAGE
    ================================================================= */
 .picks-page {
-  @apply flex flex-col min-h-screen;
+  @apply relative flex flex-col;
   background: var(--sb-dark);
   padding: 0 40px 80px;
   max-width: 900px;
   margin: 0 auto;
+}
+
+.picks-divider-top {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--sb-cyan), var(--sb-magenta), transparent);
+  box-shadow: 0 0 40px rgba(0, 200, 240, 0.3);
+}
+
+.picks-submit-row {
+  @apply flex justify-end;
+  margin-top: 40px;
 }
 
 .picks-header {
@@ -1726,25 +1779,21 @@
 }
 
 /* --- Splash light --- */
+.light .splash-root::before {
+  box-shadow: none;
+}
+
 .light .splash-bg {
-  background:
-    radial-gradient(ellipse 90% 60% at 50% 25%, rgba(0, 200, 240, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 15% 85%, rgba(230, 0, 126, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 40% at 85% 85%, rgba(0, 200, 240, 0.05) 0%, transparent 50%),
-    linear-gradient(180deg, #f2f4f7 0%, #edf0f4 40%, #f2f4f7 100%);
+  background: linear-gradient(180deg, #f2f4f7 0%, #edf0f4 40%, #f2f4f7 100%);
 }
 
 .light .splash-radial {
-  background: radial-gradient(
-    circle at 50% 30%,
-    rgba(0, 200, 240, 0.1) 0%,
-    rgba(230, 0, 126, 0.04) 35%,
-    transparent 65%
-  );
+  background: none;
+  animation: none;
 }
 
 .light .splash-vignette {
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(242, 244, 247, 0.6) 100%);
+  background: none;
 }
 
 .light .yard-line {
@@ -1760,22 +1809,17 @@
 
 .light .hero-image-wrapper {
   border-color: rgba(0, 200, 240, 0.15);
-  box-shadow: 0 0 60px rgba(0, 200, 240, 0.08), 0 20px 60px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
 }
 
 .light .hero-image-fade {
-  background:
-    linear-gradient(180deg, transparent 40%, rgba(242, 244, 247, 0.9) 100%),
-    linear-gradient(0deg, transparent 70%, rgba(242, 244, 247, 0.2) 100%);
+  background: none;
 }
 
 .light .hero-glow {
-  background: radial-gradient(
-    ellipse at center,
-    rgba(0, 200, 240, 0.08) 0%,
-    rgba(230, 0, 126, 0.04) 40%,
-    transparent 70%
-  );
+  background: none;
+  filter: none;
+  animation: none;
 }
 
 .light .badge-sub {
@@ -1799,56 +1843,120 @@
   background: rgba(0, 0, 0, 0.12);
 }
 
+.light .cta-button {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+.light .cta-button:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18) !important;
+}
+
+.light .cta-button::after {
+  animation: none;
+}
+
 .light .cta-sub {
-  color: rgba(0, 0, 0, 0.3);
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.light .vs-badge span {
+  box-shadow: none;
+}
+
+.light .seahawks-name {
+  filter: none;
+}
+
+.light .patriots-name {
+  filter: none;
 }
 
 .light .divider-diamond {
-  box-shadow: 0 0 20px rgba(0, 200, 240, 0.3);
+  box-shadow: none;
 }
 
 /* --- Friends section light --- */
+.light .friends-section {
+  background: linear-gradient(160deg, #f0f2f6 0%, #edf0f5 35%, #f1f3f7 65%, #eef1f5 100%);
+}
+
+.light .friends-section::before {
+  box-shadow: none;
+}
+
 .light .friends-title {
   color: #1a1d24;
 }
 
 .light .friend-card {
-  background: rgba(0, 200, 240, 0.08);
-  border-color: rgba(0, 200, 240, 0.18);
+  background: rgba(0, 200, 240, 0.35);
+  border-color: rgba(0, 200, 240, 0.4);
 }
 
 .light .friend-card:hover {
-  background: rgba(0, 200, 240, 0.14);
-  border-color: rgba(0, 200, 240, 0.3);
-  box-shadow: 0 0 24px rgba(0, 200, 240, 0.1);
+  background: rgba(0, 200, 240, 0.45);
+  border-color: rgba(0, 200, 240, 0.55);
+  box-shadow: 0 0 24px rgba(0, 200, 240, 0.15);
 }
 
 .light .friend-card-name {
   color: #1a1d24;
 }
 
+.light .friend-badge-complete {
+  background: rgba(139, 197, 63, 0.45) !important;
+  color: #3d6b0a !important;
+  border: 1px solid rgba(139, 197, 63, 0.6) !important;
+}
+
+.light .friend-badge-in-progress {
+  background: rgba(240, 200, 8, 0.4) !important;
+  color: #7a6200 !important;
+  border: 1px solid rgba(240, 200, 8, 0.55) !important;
+}
+
 .light .friend-badge-not-started {
-  background: rgba(0, 0, 0, 0.04) !important;
-  color: rgba(0, 0, 0, 0.4) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  background: rgba(0, 0, 0, 0.1) !important;
+  color: rgba(0, 0, 0, 0.55) !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
 }
 
 /* --- Leaderboard light --- */
+.light .leaderboard-section {
+  background: var(--background);
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+.light .leaderboard-section::before {
+  box-shadow: none;
+}
+
+.light .leaderboard-table-wrapper {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 14px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  padding: 4px;
+}
+
 .light .leaderboard-title {
   color: #1a1d24;
 }
 
 .light .leaderboard-table th {
-  border-bottom-color: rgba(0, 200, 240, 0.2);
+  background: rgba(0, 200, 240, 0.05);
+  border-bottom-color: rgba(0, 200, 240, 0.12);
 }
 
 .light .leaderboard-table td {
   color: rgba(0, 0, 0, 0.7);
-  border-bottom-color: rgba(0, 0, 0, 0.06);
+  border-bottom-color: rgba(0, 0, 0, 0.05);
 }
 
 .light .leaderboard-table tbody tr:hover {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(0, 200, 240, 0.04);
 }
 
 .light .leaderboard-name {
@@ -1860,6 +1968,10 @@
 }
 
 /* --- Picks page light --- */
+.light .picks-divider-top {
+  box-shadow: none;
+}
+
 .light .picks-back {
   color: var(--sb-cyan);
 }
