@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, ChevronUp, ChevronDown } from "lucide-react"
+import { ArrowLeft, ChevronUp, ChevronDown, Lock, LockOpen } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -22,18 +22,19 @@ import {
   renameFriend,
   deleteFriend,
   resetFriendPicks,
+  randomizePicks,
   updateProp,
   reorderProps,
-  setCorrectAnswer,
   getLeaderboard,
   saveState,
+  lockProps,
+  unlockProps,
   clearAllPicks,
   clearAllResults,
   clearAllFriends,
   clearAllProps,
 } from "@/lib/store"
 import { exportSquaresBackup, importSquaresBackup } from "@/lib/squaresStore"
-import { Leaderboard } from "@/components/Leaderboard"
 import { SquaresAdmin } from "@/components/squares/SquaresAdmin"
 import type { AppState, Friend, Prop } from "@/lib/types"
 
@@ -65,6 +66,11 @@ export default function AdminPage() {
     onConfirm: () => void
     variant: "default" | "destructive"
   } | null>(null)
+
+  const [lockedNotice, setLockedNotice] = useState(false)
+  const showLockedNotice = () => {
+    setLockedNotice(true)
+  }
 
   useEffect(() => {
     const s = getState()
@@ -263,11 +269,6 @@ export default function AdminPage() {
     URL.revokeObjectURL(url)
   }
 
-  const handleScore = (propId: string, value: "A" | "B" | null) => {
-    setCorrectAnswer(propId, value)
-    refresh()
-  }
-
   const [adminMode, setAdminMode] = useState<"props" | "squares">("props")
 
   if (!appState) return null
@@ -278,6 +279,30 @@ export default function AdminPage() {
     if (s === "in-progress") return `${getPickCount(friend)} / ${appState.props.length}`
     return "Not Started"
   }
+
+  const isLocked = appState.propsLocked === true
+
+  const lockBanner = (
+    <div className="picks-complete-banner">
+      {isLocked ? (
+        <>
+          <Lock size={20} />
+          <span>Props are locked</span>
+          <Button variant="outline" className="picks-action-btn picks-action-btn-secondary" onClick={() => { unlockProps(); refresh() }}>
+            Unlock
+          </Button>
+        </>
+      ) : (
+        <>
+          <LockOpen size={20} />
+          <span>Props are unlocked</span>
+          <Button className="picks-action-btn" onClick={() => { lockProps(); refresh() }}>
+            Lock Picks
+          </Button>
+        </>
+      )}
+    </div>
+  )
 
   return (
     <div className="admin-page">
@@ -309,31 +334,22 @@ export default function AdminPage() {
       )}
 
       {adminMode === "props" && (
-      <Tabs defaultValue="configuration" className="admin-tabs">
+      <Tabs defaultValue="friends" className="admin-tabs">
         <TabsList className="admin-tabs-list">
-          <TabsTrigger value="scoring" className="admin-tab-trigger">
-            Scoring
+          <TabsTrigger value="friends" className="admin-tab-trigger">
+            Friends
           </TabsTrigger>
-          <TabsTrigger value="configuration" className="admin-tab-trigger">
-            Configuration
+          <TabsTrigger value="props" className="admin-tab-trigger">
+            Props
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="admin-tab-trigger">
+            Settings
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="configuration" className="admin-folder-sheet">
-          <Tabs defaultValue="friends" className="admin-tabs admin-sub-tabs">
-            <TabsList className="admin-tabs-list admin-sub-tabs-list">
-              <TabsTrigger value="friends" className="admin-tab-trigger" data-value="friends">
-                Friends
-              </TabsTrigger>
-              <TabsTrigger value="props" className="admin-tab-trigger" data-value="props">
-                Props
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="admin-tab-trigger" data-value="settings">
-                Settings
-              </TabsTrigger>
-            </TabsList>
-
             <TabsContent value="friends" className="admin-sub-sheet admin-sub-sheet-friends">
+              {lockBanner}
+
               {/* Add friend form */}
               <div className="admin-add-form">
                 <Input
@@ -348,7 +364,7 @@ export default function AdminPage() {
                     if (e.key === "Enter") handleAddFriend()
                   }}
                 />
-                <Button className="admin-add-btn" onClick={handleAddFriend}>
+                <Button className={`admin-add-btn ${isLocked ? "admin-btn-locked" : ""}`} onClick={isLocked ? showLockedNotice : handleAddFriend}>
                   Add
                 </Button>
               </div>
@@ -367,6 +383,26 @@ export default function AdminPage() {
                     <div className="admin-friend-actions">
                       <Button
                         variant="outline"
+                        className={`admin-action-btn ${isLocked ? "admin-btn-locked" : ""}`}
+                        onClick={isLocked ? showLockedNotice : () => setConfirmAction({
+                          title: `Randomize ${friend.name}'s picks?`,
+                          description: "This will replace all of their current picks with random selections.",
+                          confirmLabel: "Randomize",
+                          variant: "default",
+                          onConfirm: () => { randomizePicks(friend.id); refresh() },
+                        })}
+                      >
+                        Random Picks
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className={`admin-action-btn ${isLocked ? "admin-btn-locked" : ""}`}
+                        onClick={isLocked ? showLockedNotice : () => handleResetPicks(friend)}
+                      >
+                        Reset Picks
+                      </Button>
+                      <Button
+                        variant="outline"
                         className="admin-action-btn"
                         onClick={() => {
                           setRenameTarget(friend)
@@ -374,13 +410,6 @@ export default function AdminPage() {
                         }}
                       >
                         Rename
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="admin-action-btn"
-                        onClick={() => handleResetPicks(friend)}
-                      >
-                        Reset Picks
                       </Button>
                       <Button
                         variant="destructive"
@@ -396,6 +425,8 @@ export default function AdminPage() {
             </TabsContent>
 
             <TabsContent value="props" className="admin-sub-sheet admin-sub-sheet-props">
+              {lockBanner}
+
               <div className="admin-prop-list">
                 {sortedProps.map((prop, i) => (
                   <div key={prop.id} className="admin-prop-row">
@@ -409,8 +440,8 @@ export default function AdminPage() {
                     <div className="admin-prop-actions">
                       <Button
                         variant="outline"
-                        className="admin-action-btn"
-                        onClick={() => openEditProp(prop)}
+                        className={`admin-action-btn ${isLocked ? "admin-btn-locked" : ""}`}
+                        onClick={isLocked ? showLockedNotice : () => openEditProp(prop)}
                       >
                         Edit
                       </Button>
@@ -437,6 +468,8 @@ export default function AdminPage() {
             </TabsContent>
 
             <TabsContent value="settings" className="admin-sub-sheet admin-sub-sheet-settings">
+              {lockBanner}
+
               {/* Event name */}
               <div className="admin-settings-section">
                 <h3 className="admin-section-title">Event Name</h3>
@@ -461,8 +494,8 @@ export default function AdminPage() {
                 <div className="admin-reset-grid">
                   <Button
                     variant="destructive"
-                    className="admin-reset-btn"
-                    onClick={() => setConfirmAction({
+                    className={`admin-reset-btn ${isLocked ? "admin-btn-locked" : ""}`}
+                    onClick={isLocked ? showLockedNotice : () => setConfirmAction({
                       title: "Clear all picks?",
                       description: "This will erase all friends' picks. Are you sure?",
                       confirmLabel: "Clear Picks",
@@ -487,8 +520,8 @@ export default function AdminPage() {
                   </Button>
                   <Button
                     variant="destructive"
-                    className="admin-reset-btn"
-                    onClick={() => setConfirmAction({
+                    className={`admin-reset-btn ${isLocked ? "admin-btn-locked" : ""}`}
+                    onClick={isLocked ? showLockedNotice : () => setConfirmAction({
                       title: "Clear all friends?",
                       description: "This will remove all friends and their picks. Are you sure?",
                       confirmLabel: "Clear Friends",
@@ -500,8 +533,8 @@ export default function AdminPage() {
                   </Button>
                   <Button
                     variant="destructive"
-                    className="admin-reset-btn"
-                    onClick={() => setConfirmAction({
+                    className={`admin-reset-btn ${isLocked ? "admin-btn-locked" : ""}`}
+                    onClick={isLocked ? showLockedNotice : () => setConfirmAction({
                       title: "Reset all props?",
                       description: "This will restore the default 25 props and clear all picks and results. Are you sure?",
                       confirmLabel: "Clear Props",
@@ -547,42 +580,6 @@ export default function AdminPage() {
                 </div>
               </div>
             </TabsContent>
-          </Tabs>
-        </TabsContent>
-
-        <TabsContent value="scoring" className="admin-scoring-sheet">
-          <div className="admin-scoring-list">
-            {sortedProps.map((prop, i) => (
-              <div key={prop.id} className="admin-scoring-row">
-                <div className="admin-scoring-info">
-                  <span className="admin-prop-order">{i + 1}</span>
-                  <span className="admin-prop-question">{prop.question}</span>
-                </div>
-                <div className="admin-scoring-buttons">
-                  <Button
-                    variant={prop.correctAnswer === "A" ? "default" : "outline"}
-                    className={`admin-score-btn ${prop.correctAnswer === "A" ? "admin-score-active" : ""}`}
-                    onClick={() => handleScore(prop.id, prop.correctAnswer === "A" ? null : "A")}
-                  >
-                    {prop.optionA}
-                  </Button>
-                  <Button
-                    variant={prop.correctAnswer === "B" ? "default" : "outline"}
-                    className={`admin-score-btn ${prop.correctAnswer === "B" ? "admin-score-active" : ""}`}
-                    onClick={() => handleScore(prop.id, prop.correctAnswer === "B" ? null : "B")}
-                  >
-                    {prop.optionB}
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="admin-scoring-leaderboard">
-            <h3 className="admin-section-title">Live Leaderboard</h3>
-            <Leaderboard entries={leaderboard} />
-          </div>
-        </TabsContent>
       </Tabs>
       )}
 
@@ -688,6 +685,17 @@ export default function AdminPage() {
         onConfirm={() => {
           confirmAction?.onConfirm()
         }}
+      />
+
+      <ConfirmDialog
+        open={lockedNotice}
+        onOpenChange={(open) => {
+          if (!open) setLockedNotice(false)
+        }}
+        title="Props are locked"
+        description="Unlock props in the Settings tab before making changes."
+        confirmLabel="OK"
+        onConfirm={() => setLockedNotice(false)}
       />
     </div>
   )

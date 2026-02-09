@@ -82,6 +82,16 @@ export function setPick(
   }
 }
 
+export function randomizePicks(friendId: string): void {
+  const state = getState()
+  const friend = state.friends.find((f) => f.id === friendId)
+  if (!friend) return
+  for (const prop of state.props) {
+    friend.picks[prop.id] = Math.random() < 0.5 ? "A" : "B"
+  }
+  saveState(state)
+}
+
 export function isFriendComplete(friendId: string): boolean {
   const state = getState()
   const friend = state.friends.find((f) => f.id === friendId)
