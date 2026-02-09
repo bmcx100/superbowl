@@ -93,10 +93,10 @@ export default function Home() {
           <div className="cta-area">
             <div className="cta-buttons">
               <Button className="cta-button" onClick={() => router.push("/picks")}>
-                MAKE YOUR PICKS
+                PROPS
               </Button>
-              <Button className="cta-button" onClick={() => router.push("/leaderboard")}>
-                LEADERBOARD
+              <Button className="cta-button" onClick={() => router.push("/squares")}>
+                SQUARES
               </Button>
             </div>
             <p className="cta-sub">Free to play &bull; Bragging rights guaranteed</p>

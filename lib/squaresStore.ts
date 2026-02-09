@@ -39,7 +39,21 @@ export function getSquaresState(): SquaresState {
   if (typeof window === "undefined") return defaultSquaresState()
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return defaultSquaresState()
+    if (!raw) {
+      const state = defaultSquaresState()
+      const propsState = getState()
+      const players: SquaresPlayer[] = []
+      for (const friend of propsState.friends) {
+        players.push({
+          id: crypto.randomUUID(),
+          name: friend.name,
+          color: getNextColor(players),
+        })
+      }
+      state.players = players
+      saveSquaresState(state)
+      return state
+    }
     return JSON.parse(raw) as SquaresState
   } catch {
     return defaultSquaresState()

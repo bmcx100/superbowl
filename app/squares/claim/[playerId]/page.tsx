@@ -14,6 +14,7 @@ import {
   getPlayerClaimedCount,
   canPlayerClaim,
 } from "@/lib/squaresStore"
+import { getState } from "@/lib/store"
 import { getContrastColor } from "@/lib/squaresColors"
 import type { SquaresState, SquaresPlayer } from "@/lib/squaresTypes"
 
@@ -64,20 +65,22 @@ export default function ClaimPage() {
   const limit = getPlayerLimit(state, playerId)
   const claimed = getPlayerClaimedCount(state, playerId)
 
+  const handleSubmit = () => {
+    const appState = getState()
+    const friend = appState.friends.find((f) => f.name.toLowerCase() === player.name.toLowerCase())
+    if (friend) {
+      const allPicked = appState.props.every((p) => friend.picks[p.id] !== undefined)
+      if (allPicked) {
+        router.push("/")
+        return
+      }
+    }
+    router.back()
+  }
+
   return (
     <div className="page-root">
       <section className="squares-page">
-        <div className="sq-claim-header">
-          <Button
-            variant="outline"
-            className="sq-claim-back"
-            onClick={() => router.push("/squares")}
-          >
-            <ArrowLeft size={20} />
-            <span>Done</span>
-          </Button>
-        </div>
-
         <div className="sq-claim-info">
           <div
             className="sq-claim-color"
@@ -89,12 +92,16 @@ export default function ClaimPage() {
             <h1 className="sq-claim-name">Claiming for: {player.name}</h1>
             <p className="sq-claim-count">Claimed: {claimed} / {limit}</p>
           </div>
+          <Button className="picks-action-btn" onClick={handleSubmit}>
+            SUBMIT
+          </Button>
         </div>
 
         <SquaresGrid
           state={state}
           interactive
           onCellClick={handleCellClick}
+          claimingPlayerId={playerId}
         />
       </section>
       <Footer />

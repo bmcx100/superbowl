@@ -309,126 +309,248 @@ export default function AdminPage() {
       )}
 
       {adminMode === "props" && (
-      <Tabs defaultValue="friends" className="admin-tabs">
+      <Tabs defaultValue="configuration" className="admin-tabs">
         <TabsList className="admin-tabs-list">
-          <TabsTrigger value="friends" className="admin-tab-trigger">
-            Friends
-          </TabsTrigger>
-          <TabsTrigger value="props" className="admin-tab-trigger">
-            Props
-          </TabsTrigger>
           <TabsTrigger value="scoring" className="admin-tab-trigger">
             Scoring
           </TabsTrigger>
-          <TabsTrigger value="settings" className="admin-tab-trigger">
-            Settings
+          <TabsTrigger value="configuration" className="admin-tab-trigger">
+            Configuration
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="friends">
-          {/* Add friend form */}
-          <div className="admin-add-form">
-            <Input
-              className="admin-add-input"
-              placeholder="Friend's name..."
-              value={newName}
-              onChange={(e) => {
-                setNewName(e.target.value)
-                setAddError("")
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleAddFriend()
-              }}
-            />
-            <Button className="admin-add-btn" onClick={handleAddFriend}>
-              Add
-            </Button>
-          </div>
-          {addError && <p className="admin-add-error">{addError}</p>}
+        <TabsContent value="configuration" className="admin-folder-sheet">
+          <Tabs defaultValue="friends" className="admin-tabs admin-sub-tabs">
+            <TabsList className="admin-tabs-list admin-sub-tabs-list">
+              <TabsTrigger value="friends" className="admin-tab-trigger" data-value="friends">
+                Friends
+              </TabsTrigger>
+              <TabsTrigger value="props" className="admin-tab-trigger" data-value="props">
+                Props
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="admin-tab-trigger" data-value="settings">
+                Settings
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Friend list */}
-          <div className="admin-friend-list">
-            {appState.friends.map((friend) => (
-              <div key={friend.id} className="admin-friend-row">
-                <div className="admin-friend-info">
-                  <span className="admin-friend-name">{friend.name}</span>
-                  <Badge className={`friend-badge friend-badge-${getStatus(friend)}`}>
-                    {statusLabel(friend)}
-                  </Badge>
-                </div>
-                <div className="admin-friend-actions">
-                  <Button
-                    variant="outline"
-                    className="admin-action-btn"
-                    onClick={() => {
-                      setRenameTarget(friend)
-                      setRenameName(friend.name)
+            <TabsContent value="friends" className="admin-sub-sheet admin-sub-sheet-friends">
+              {/* Add friend form */}
+              <div className="admin-add-form">
+                <Input
+                  className="admin-add-input"
+                  placeholder="Friend's name..."
+                  value={newName}
+                  onChange={(e) => {
+                    setNewName(e.target.value)
+                    setAddError("")
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleAddFriend()
+                  }}
+                />
+                <Button className="admin-add-btn" onClick={handleAddFriend}>
+                  Add
+                </Button>
+              </div>
+              {addError && <p className="admin-add-error">{addError}</p>}
+
+              {/* Friend list */}
+              <div className="admin-friend-list">
+                {appState.friends.map((friend) => (
+                  <div key={friend.id} className="admin-friend-row">
+                    <div className="admin-friend-info">
+                      <span className="admin-friend-name">{friend.name}</span>
+                      <Badge className={`friend-badge friend-badge-${getStatus(friend)}`}>
+                        {statusLabel(friend)}
+                      </Badge>
+                    </div>
+                    <div className="admin-friend-actions">
+                      <Button
+                        variant="outline"
+                        className="admin-action-btn"
+                        onClick={() => {
+                          setRenameTarget(friend)
+                          setRenameName(friend.name)
+                        }}
+                      >
+                        Rename
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="admin-action-btn"
+                        onClick={() => handleResetPicks(friend)}
+                      >
+                        Reset Picks
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        className="admin-action-btn"
+                        onClick={() => handleDelete(friend)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="props" className="admin-sub-sheet admin-sub-sheet-props">
+              <div className="admin-prop-list">
+                {sortedProps.map((prop, i) => (
+                  <div key={prop.id} className="admin-prop-row">
+                    <div className="admin-prop-order">{i + 1}</div>
+                    <div className="admin-prop-info">
+                      <span className="admin-prop-question">{prop.question}</span>
+                      <span className="admin-prop-options">
+                        {prop.optionA} / {prop.optionB}
+                      </span>
+                    </div>
+                    <div className="admin-prop-actions">
+                      <Button
+                        variant="outline"
+                        className="admin-action-btn"
+                        onClick={() => openEditProp(prop)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="admin-arrow-btn"
+                        onClick={() => handleMoveProp(i, "up")}
+                        disabled={i === 0}
+                      >
+                        <ChevronUp size={20} />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="admin-arrow-btn"
+                        onClick={() => handleMoveProp(i, "down")}
+                        disabled={i === sortedProps.length - 1}
+                      >
+                        <ChevronDown size={20} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="settings" className="admin-sub-sheet admin-sub-sheet-settings">
+              {/* Event name */}
+              <div className="admin-settings-section">
+                <h3 className="admin-section-title">Event Name</h3>
+                <div className="admin-add-form">
+                  <Input
+                    className="admin-add-input"
+                    value={eventName}
+                    onChange={(e) => setEventName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleEventNameSave()
                     }}
-                  >
-                    Rename
+                  />
+                  <Button className="admin-add-btn" onClick={handleEventNameSave}>
+                    Save
                   </Button>
+                </div>
+              </div>
+
+              {/* Reset controls */}
+              <div className="admin-settings-section">
+                <h3 className="admin-section-title">Reset Controls</h3>
+                <div className="admin-reset-grid">
                   <Button
-                    variant="outline"
-                    className="admin-action-btn"
-                    onClick={() => handleResetPicks(friend)}
+                    variant="destructive"
+                    className="admin-reset-btn"
+                    onClick={() => setConfirmAction({
+                      title: "Clear all picks?",
+                      description: "This will erase all friends' picks. Are you sure?",
+                      confirmLabel: "Clear Picks",
+                      variant: "destructive",
+                      onConfirm: () => { clearAllPicks(); refresh() },
+                    })}
                   >
-                    Reset Picks
+                    Clear Picks
                   </Button>
                   <Button
                     variant="destructive"
-                    className="admin-action-btn"
-                    onClick={() => handleDelete(friend)}
+                    className="admin-reset-btn"
+                    onClick={() => setConfirmAction({
+                      title: "Clear all results?",
+                      description: "This will clear all correct answers. Are you sure?",
+                      confirmLabel: "Clear Results",
+                      variant: "destructive",
+                      onConfirm: () => { clearAllResults(); refresh() },
+                    })}
                   >
-                    Delete
+                    Clear Results
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="admin-reset-btn"
+                    onClick={() => setConfirmAction({
+                      title: "Clear all friends?",
+                      description: "This will remove all friends and their picks. Are you sure?",
+                      confirmLabel: "Clear Friends",
+                      variant: "destructive",
+                      onConfirm: () => { clearAllFriends(); refresh() },
+                    })}
+                  >
+                    Clear Friends
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="admin-reset-btn"
+                    onClick={() => setConfirmAction({
+                      title: "Reset all props?",
+                      description: "This will restore the default 25 props and clear all picks and results. Are you sure?",
+                      confirmLabel: "Clear Props",
+                      variant: "destructive",
+                      onConfirm: () => { clearAllProps(); refresh() },
+                    })}
+                  >
+                    Clear Props
                   </Button>
                 </div>
               </div>
-            ))}
-          </div>
-        </TabsContent>
 
-        <TabsContent value="props">
-          <div className="admin-prop-list">
-            {sortedProps.map((prop, i) => (
-              <div key={prop.id} className="admin-prop-row">
-                <div className="admin-prop-order">{i + 1}</div>
-                <div className="admin-prop-info">
-                  <span className="admin-prop-question">{prop.question}</span>
-                  <span className="admin-prop-options">
-                    {prop.optionA} / {prop.optionB}
-                  </span>
+              {/* Backup & Restore */}
+              <div className="admin-settings-section">
+                <h3 className="admin-section-title">Backup &amp; Restore</h3>
+                <div className="admin-backup-row">
+                  <Button variant="outline" className="admin-action-btn" onClick={handleDownloadBackup}>
+                    Download Backup
+                  </Button>
+                  <Button variant="outline" className="admin-action-btn" onClick={() => fileInputRef.current?.click()}>
+                    Restore Backup
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json"
+                    className="admin-file-input"
+                    onChange={handleRestoreFile}
+                  />
                 </div>
-                <div className="admin-prop-actions">
-                  <Button
-                    variant="outline"
-                    className="admin-action-btn"
-                    onClick={() => openEditProp(prop)}
-                  >
-                    Edit
+              </div>
+
+              {/* CSV Exports */}
+              <div className="admin-settings-section">
+                <h3 className="admin-section-title">CSV Exports</h3>
+                <div className="admin-backup-row">
+                  <Button variant="outline" className="admin-action-btn" onClick={handleExportPicksCSV}>
+                    Export Picks Matrix
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="admin-arrow-btn"
-                    onClick={() => handleMoveProp(i, "up")}
-                    disabled={i === 0}
-                  >
-                    <ChevronUp size={20} />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="admin-arrow-btn"
-                    onClick={() => handleMoveProp(i, "down")}
-                    disabled={i === sortedProps.length - 1}
-                  >
-                    <ChevronDown size={20} />
+                  <Button variant="outline" className="admin-action-btn" onClick={handleExportLeaderboardCSV}>
+                    Export Leaderboard
                   </Button>
                 </div>
               </div>
-            ))}
-          </div>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
-        <TabsContent value="scoring">
+        <TabsContent value="scoring" className="admin-scoring-sheet">
           <div className="admin-scoring-list">
             {sortedProps.map((prop, i) => (
               <div key={prop.id} className="admin-scoring-row">
@@ -459,118 +581,6 @@ export default function AdminPage() {
           <div className="admin-scoring-leaderboard">
             <h3 className="admin-section-title">Live Leaderboard</h3>
             <Leaderboard entries={leaderboard} />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="settings">
-          {/* Event name */}
-          <div className="admin-settings-section">
-            <h3 className="admin-section-title">Event Name</h3>
-            <div className="admin-add-form">
-              <Input
-                className="admin-add-input"
-                value={eventName}
-                onChange={(e) => setEventName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleEventNameSave()
-                }}
-              />
-              <Button className="admin-add-btn" onClick={handleEventNameSave}>
-                Save
-              </Button>
-            </div>
-          </div>
-
-          {/* Reset controls */}
-          <div className="admin-settings-section">
-            <h3 className="admin-section-title">Reset Controls</h3>
-            <div className="admin-reset-grid">
-              <Button
-                variant="destructive"
-                className="admin-reset-btn"
-                onClick={() => setConfirmAction({
-                  title: "Clear all picks?",
-                  description: "This will erase all friends' picks. Are you sure?",
-                  confirmLabel: "Clear Picks",
-                  variant: "destructive",
-                  onConfirm: () => { clearAllPicks(); refresh() },
-                })}
-              >
-                Clear Picks
-              </Button>
-              <Button
-                variant="destructive"
-                className="admin-reset-btn"
-                onClick={() => setConfirmAction({
-                  title: "Clear all results?",
-                  description: "This will clear all correct answers. Are you sure?",
-                  confirmLabel: "Clear Results",
-                  variant: "destructive",
-                  onConfirm: () => { clearAllResults(); refresh() },
-                })}
-              >
-                Clear Results
-              </Button>
-              <Button
-                variant="destructive"
-                className="admin-reset-btn"
-                onClick={() => setConfirmAction({
-                  title: "Clear all friends?",
-                  description: "This will remove all friends and their picks. Are you sure?",
-                  confirmLabel: "Clear Friends",
-                  variant: "destructive",
-                  onConfirm: () => { clearAllFriends(); refresh() },
-                })}
-              >
-                Clear Friends
-              </Button>
-              <Button
-                variant="destructive"
-                className="admin-reset-btn"
-                onClick={() => setConfirmAction({
-                  title: "Reset all props?",
-                  description: "This will restore the default 25 props and clear all picks and results. Are you sure?",
-                  confirmLabel: "Clear Props",
-                  variant: "destructive",
-                  onConfirm: () => { clearAllProps(); refresh() },
-                })}
-              >
-                Clear Props
-              </Button>
-            </div>
-          </div>
-
-          {/* Backup & Restore */}
-          <div className="admin-settings-section">
-            <h3 className="admin-section-title">Backup &amp; Restore</h3>
-            <div className="admin-backup-row">
-              <Button variant="outline" className="admin-action-btn" onClick={handleDownloadBackup}>
-                Download Backup
-              </Button>
-              <Button variant="outline" className="admin-action-btn" onClick={() => fileInputRef.current?.click()}>
-                Restore Backup
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                className="admin-file-input"
-                onChange={handleRestoreFile}
-              />
-            </div>
-          </div>
-
-          {/* CSV Exports */}
-          <div className="admin-settings-section">
-            <h3 className="admin-section-title">CSV Exports</h3>
-            <div className="admin-backup-row">
-              <Button variant="outline" className="admin-action-btn" onClick={handleExportPicksCSV}>
-                Export Picks Matrix
-              </Button>
-              <Button variant="outline" className="admin-action-btn" onClick={handleExportLeaderboardCSV}>
-                Export Leaderboard
-              </Button>
-            </div>
           </div>
         </TabsContent>
       </Tabs>

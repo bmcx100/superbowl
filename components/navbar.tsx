@@ -2,13 +2,10 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
-import { Settings } from "lucide-react"
+import { Home, Settings } from "lucide-react"
 import { ThemeToggle } from "@/components/ThemeToggle"
 
 export function Navbar() {
-  const [mobileOpen, setMobileOpen] = useState(false)
-
   return (
     <nav className="navbar">
       <div className="nav-ticker" aria-hidden="true">
@@ -34,50 +31,16 @@ export function Navbar() {
             </div>
           </Link>
 
-          <div className="nav-links">
-            <Link href="/picks" className="nav-link">Make Your Picks</Link>
-            <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
-            <Link href="/squares" className="nav-link">Squares</Link>
-          </div>
-
           <div className="nav-actions">
+            <Link href="/" className="nav-settings-icon" aria-label="Home">
+              <Home size={26} />
+            </Link>
+            <Link href="/admin" className="nav-settings-icon" aria-label="Admin Settings">
+              <Settings size={26} />
+            </Link>
             <ThemeToggle />
-            <Link href="/admin" className="nav-cta">
-              <Settings size={22} />
-              <span>Admin</span>
-            </Link>
           </div>
-
-          <button
-            className="nav-mobile-toggle"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
-          >
-            <span className={`hamburger ${mobileOpen ? "open" : ""}`}>
-              <span /><span /><span />
-            </span>
-          </button>
         </div>
-
-        {mobileOpen && (
-          <div className="nav-mobile-menu">
-            <Link href="/picks" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
-              Make Your Picks
-            </Link>
-            <Link href="/leaderboard" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
-              Leaderboard
-            </Link>
-            <Link href="/squares" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
-              Squares
-            </Link>
-            <div className="nav-mobile-bottom">
-              <Link href="/admin" className="nav-mobile-cta" onClick={() => setMobileOpen(false)}>
-                Admin
-              </Link>
-              <ThemeToggle />
-            </div>
-          </div>
-        )}
       </div>
     </nav>
   )

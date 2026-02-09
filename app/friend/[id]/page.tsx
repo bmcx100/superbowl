@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getState, setPick } from "@/lib/store"
+import { getSquaresState, getPlayerLimit, getPlayerClaimedCount } from "@/lib/squaresStore"
 import { PropQuestion } from "@/components/PropQuestion"
 import { Footer } from "@/components/footer"
 import type { Friend, Prop } from "@/lib/types"
@@ -17,6 +18,9 @@ export default function FriendPicksPage() {
   const [friend, setFriend] = useState<Friend | null>(null)
   const [props, setProps] = useState<Prop[]>([])
   const [picks, setPicks] = useState<Record<string, "A" | "B">>({})
+  const [squaresPlayerId, setSquaresPlayerId] = useState<string | null>(null)
+  const [squaresFull, setSquaresFull] = useState(false)
+  const [locked, setLocked] = useState(false)
 
   useEffect(() => {
     const state = getState()
@@ -25,17 +29,29 @@ export default function FriendPicksPage() {
       router.push("/picks")
       return
     }
+    if (state.propsLocked) {
+      setLocked(true)
+    }
     setFriend(f)
     setPicks({ ...f.picks })
     setProps([...state.props].sort((a, b) => a.order - b.order))
+    const sqState = getSquaresState()
+    const sqPlayer = sqState.players.find((p) => p.name.toLowerCase() === f.name.toLowerCase())
+    if (sqPlayer) {
+      setSquaresPlayerId(sqPlayer.id)
+      const limit = getPlayerLimit(sqState, sqPlayer.id)
+      const claimed = getPlayerClaimedCount(sqState, sqPlayer.id)
+      setSquaresFull(claimed >= limit)
+    }
   }, [friendId, router])
 
   const handlePick = useCallback(
     (propId: string, value: "A" | "B") => {
+      if (locked) return
       setPick(friendId, propId, value)
       setPicks((prev) => ({ ...prev, [propId]: value }))
     },
-    [friendId]
+    [friendId, locked]
   )
 
   if (!friend) return null
@@ -83,7 +99,16 @@ export default function FriendPicksPage() {
         </div>
 
         <div className="picks-submit-row">
-          <Button className="cta-button" onClick={() => router.push("/picks")}>
+          {squaresPlayerId && (
+            <Button
+              variant={squaresFull ? "outline" : "default"}
+              className={squaresFull ? "picks-action-btn picks-action-btn-secondary" : "picks-action-btn"}
+              onClick={() => router.push(`/squares/claim/${squaresPlayerId}`)}
+            >
+              {squaresFull ? "SQUARES" : "CLAIM SQUARES"}
+            </Button>
+          )}
+          <Button className="picks-action-btn" onClick={() => router.push("/picks")}>
             SUBMIT PICKS
           </Button>
         </div>

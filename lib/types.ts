@@ -17,4 +17,5 @@ export interface AppState {
   eventName: string
   props: Prop[]
   friends: Friend[]
+  propsLocked?: boolean
 }

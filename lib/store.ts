@@ -89,6 +89,26 @@ export function isFriendComplete(friendId: string): boolean {
   return state.props.every((p) => friend.picks[p.id] !== undefined)
 }
 
+export function areAllFriendsComplete(): boolean {
+  const state = getState()
+  if (state.friends.length === 0 || state.props.length === 0) return false
+  return state.friends.every((f) =>
+    state.props.every((p) => f.picks[p.id] !== undefined)
+  )
+}
+
+export function lockProps(): void {
+  const state = getState()
+  state.propsLocked = true
+  saveState(state)
+}
+
+export function unlockProps(): void {
+  const state = getState()
+  state.propsLocked = false
+  saveState(state)
+}
+
 // --- Props ---
 
 export function updateProp(

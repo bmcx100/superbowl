@@ -157,6 +157,38 @@ export function SquaresAdmin() {
     })
   }
 
+  const handleAutoFillAll = () => {
+    setConfirmAction({
+      title: "Auto-Fill All Players?",
+      description: "This will randomly fill all remaining squares for every player. Continue?",
+      confirmLabel: "Auto-Fill All",
+      variant: "default",
+      onConfirm: () => {
+        for (const p of sqState.players) {
+          autoFillPlayer(p.id)
+        }
+        refresh()
+      },
+    })
+  }
+
+  const handleClearAll = () => {
+    setConfirmAction({
+      title: "Clear All Squares?",
+      description: "This will unclaim every square on the board. Continue?",
+      confirmLabel: "Clear All",
+      variant: "destructive",
+      onConfirm: () => {
+        const state = getSquaresState()
+        for (const sq of state.board) {
+          sq.ownerId = null
+        }
+        saveSquaresState(state)
+        refresh()
+      },
+    })
+  }
+
   const handleLock = () => {
     setConfirmAction({
       title: "Lock Board?",
@@ -517,7 +549,12 @@ export function SquaresAdmin() {
 
           {/* Auto-fill */}
           <div className="sq-admin-section">
-            <h4 className="admin-section-title">Auto-Fill</h4>
+            <div className="sq-admin-section-header">
+              <h4 className="admin-section-title">Auto-Fill</h4>
+              <Button className="sq-admin-action-btn" onClick={handleAutoFillAll}>
+                Auto-Fill All
+              </Button>
+            </div>
             <div className="sq-admin-autofill-list">
               {sqState.players.map((p) => {
                 const claimed = getPlayerClaimedCount(sqState, p.id)
@@ -549,7 +586,12 @@ export function SquaresAdmin() {
 
           {/* Admin clear squares */}
           <div className="sq-admin-section">
-            <h4 className="admin-section-title">Clear Squares</h4>
+            <div className="sq-admin-section-header">
+              <h4 className="admin-section-title">Clear Squares</h4>
+              <Button variant="destructive" className="sq-admin-action-btn" onClick={handleClearAll}>
+                Clear All
+              </Button>
+            </div>
             <div className="sq-admin-autofill-list">
               {sqState.players.map((p) => {
                 const claimed = getPlayerClaimedCount(sqState, p.id)
