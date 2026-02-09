@@ -15,6 +15,7 @@ import {
   renameSquaresPlayer,
   removeSquaresPlayer,
   updatePlayerColor,
+  updatePlayerInitials,
   getBaseLimit,
   getRemainder,
   getPlayerLimit,
@@ -33,7 +34,6 @@ import {
   recordWinner,
   clearWinner,
   adminClearSquare,
-  flipOrientation,
   exportSquaresBackup,
   importSquaresBackup,
   isBaseRoundComplete,
@@ -202,10 +202,28 @@ export function SquaresAdmin() {
   const handleUnlock = () => {
     setConfirmAction({
       title: "Unlock Board?",
-      description: "Unlocking will allow players to modify claims again. Are you sure?",
+      description: "Unlocking will reset the row/column numbers and allow players to modify claims again. Are you sure?",
       confirmLabel: "Unlock",
       variant: "destructive",
-      onConfirm: () => { unlockBoard(); refresh() },
+      onConfirm: () => {
+        const state = getSquaresState()
+        state.colNumbers = null
+        state.rowNumbers = null
+        state.winners = []
+        saveSquaresState(state)
+        unlockBoard()
+        refresh()
+      },
+    })
+  }
+
+  const showLockedNotice = () => {
+    setConfirmAction({
+      title: "Board is locked",
+      description: "The board is currently locked. Unlock it first to make changes.",
+      confirmLabel: "OK",
+      variant: "default",
+      onConfirm: () => {},
     })
   }
 
@@ -304,21 +322,6 @@ export function SquaresAdmin() {
   }
 
   // --- Section E: Settings ---
-  const handleFlip = () => {
-    if (sqState.winners.length > 0) {
-      setConfirmAction({
-        title: "Flip Orientation?",
-        description: "Flipping doesn't retroactively change past winners. Continue?",
-        confirmLabel: "Flip",
-        variant: "default",
-        onConfirm: () => { flipOrientation(); refresh() },
-      })
-    } else {
-      flipOrientation()
-      refresh()
-    }
-  }
-
   const handleExportBoardCSV = () => {
     const header = ["", ...(sqState.colNumbers ?? Array(10).fill("?")).map(String)]
     const rows = Array.from({ length: 10 }).map((_, r) => {
@@ -417,7 +420,7 @@ export function SquaresAdmin() {
         </TabsList>
 
         {/* Section A: Players */}
-        <TabsContent value="players">
+        <TabsContent value="players" className="admin-folder-sheet sq-admin-sheet-players">
           {/* Import from Props */}
           {sqState.players.length === 0 && (
             <div className="sq-admin-section">
@@ -436,7 +439,10 @@ export function SquaresAdmin() {
               onChange={(e) => { setNewPlayerName(e.target.value); setAddPlayerError("") }}
               onKeyDown={(e) => { if (e.key === "Enter") handleAddPlayer() }}
             />
-            <Button className="admin-add-btn" onClick={handleAddPlayer}>Add</Button>
+            <Button
+              className={`admin-add-btn ${sqState.locked ? "admin-btn-locked" : ""}`}
+              onClick={sqState.locked ? showLockedNotice : handleAddPlayer}
+            >Add</Button>
           </div>
           {addPlayerError && <p className="admin-add-error">{addPlayerError}</p>}
 
@@ -448,9 +454,12 @@ export function SquaresAdmin() {
               return (
                 <div key={player.id} className="admin-friend-row">
                   <div className="admin-friend-info">
-                    <div
-                      className="sq-admin-color-swatch"
-                      style={{ backgroundColor: player.color }}
+                    <input
+                      className="sq-admin-initials-input"
+                      style={{ backgroundColor: player.color, color: getContrastColor(player.color) }}
+                      value={player.initials ?? player.name.charAt(0).toUpperCase()}
+                      maxLength={3}
+                      onChange={(e) => { updatePlayerInitials(player.id, e.target.value); refresh() }}
                     />
                     <span className="admin-friend-name">{player.name}</span>
                     <span className="sq-admin-claimed-count">{claimed} squares</span>
@@ -472,8 +481,8 @@ export function SquaresAdmin() {
                     </Button>
                     <Button
                       variant="destructive"
-                      className="admin-action-btn"
-                      onClick={() => handleRemovePlayer(player.id, player.name)}
+                      className={`admin-action-btn ${sqState.locked ? "admin-btn-locked" : ""}`}
+                      onClick={sqState.locked ? showLockedNotice : () => handleRemovePlayer(player.id, player.name)}
                     >
                       Remove
                     </Button>
@@ -499,7 +508,7 @@ export function SquaresAdmin() {
         </TabsContent>
 
         {/* Section B: Board Management */}
-        <TabsContent value="board">
+        <TabsContent value="board" className="admin-folder-sheet sq-admin-sheet-board">
           <div className="sq-admin-section">
             <div className="sq-admin-stats">
               <span>Total claimed: {totalClaimed} / 100</span>
@@ -551,7 +560,10 @@ export function SquaresAdmin() {
           <div className="sq-admin-section">
             <div className="sq-admin-section-header">
               <h4 className="admin-section-title">Auto-Fill</h4>
-              <Button className="sq-admin-action-btn" onClick={handleAutoFillAll}>
+              <Button
+                className={`sq-admin-action-btn ${sqState.locked ? "admin-btn-locked" : ""}`}
+                onClick={sqState.locked ? showLockedNotice : handleAutoFillAll}
+              >
                 Auto-Fill All
               </Button>
             </div>
@@ -565,8 +577,8 @@ export function SquaresAdmin() {
                   <Button
                     key={p.id}
                     variant="outline"
-                    className="admin-action-btn"
-                    onClick={() => handleAutoFill(p.id, p.name)}
+                    className={`admin-action-btn ${sqState.locked ? "admin-btn-locked" : ""}`}
+                    onClick={sqState.locked ? showLockedNotice : () => handleAutoFill(p.id, p.name)}
                   >
                     Auto-Fill {p.name} ({remaining})
                   </Button>
@@ -588,7 +600,11 @@ export function SquaresAdmin() {
           <div className="sq-admin-section">
             <div className="sq-admin-section-header">
               <h4 className="admin-section-title">Clear Squares</h4>
-              <Button variant="destructive" className="sq-admin-action-btn" onClick={handleClearAll}>
+              <Button
+                variant="destructive"
+                className={`sq-admin-action-btn ${sqState.locked ? "admin-btn-locked" : ""}`}
+                onClick={sqState.locked ? showLockedNotice : handleClearAll}
+              >
                 Clear All
               </Button>
             </div>
@@ -600,8 +616,8 @@ export function SquaresAdmin() {
                   <Button
                     key={p.id}
                     variant="outline"
-                    className="admin-action-btn"
-                    onClick={() => handleClearAllForPlayer(p.id, p.name)}
+                    className={`admin-action-btn ${sqState.locked ? "admin-btn-locked" : ""}`}
+                    onClick={sqState.locked ? showLockedNotice : () => handleClearAllForPlayer(p.id, p.name)}
                   >
                     Clear {p.name} ({claimed})
                   </Button>
@@ -616,19 +632,20 @@ export function SquaresAdmin() {
         </TabsContent>
 
         {/* Section C: Numbers */}
-        <TabsContent value="numbers">
+        <TabsContent value="numbers" className="admin-folder-sheet sq-admin-sheet-numbers">
           <div className="sq-admin-section">
             {!numbersReady ? (
               <>
-                <Button
-                  className="sq-admin-action-btn"
-                  onClick={handleRandomize}
-                  disabled={!canRandomize(sqState)}
-                >
-                  Randomize Numbers
-                </Button>
-                {!canRandomize(sqState) && (
-                  <p className="sq-admin-hint">Board must be locked with all 100 squares claimed.</p>
+                {sqState.locked ? (
+                  <Button
+                    className="sq-admin-action-btn"
+                    onClick={handleRandomize}
+                    disabled={!canRandomize(sqState)}
+                  >
+                    Randomize Numbers
+                  </Button>
+                ) : (
+                  <p className="sq-admin-hint">Lock the board to randomize numbers.</p>
                 )}
               </>
             ) : (
@@ -650,7 +667,7 @@ export function SquaresAdmin() {
         </TabsContent>
 
         {/* Section D: Scoring */}
-        <TabsContent value="scoring">
+        <TabsContent value="scoring" className="admin-folder-sheet sq-admin-sheet-scoring">
           {!numbersReady && (
             <p className="sq-admin-hint">Randomize numbers before scoring.</p>
           )}
@@ -712,17 +729,7 @@ export function SquaresAdmin() {
         </TabsContent>
 
         {/* Section E: Settings */}
-        <TabsContent value="settings">
-          <div className="sq-admin-section">
-            <h4 className="admin-section-title">Orientation</h4>
-            <p className="sq-admin-hint">
-              Currently: {sqState.orientation === "patriots-cols" ? "Patriots on columns, Seahawks on rows" : "Seahawks on columns, Patriots on rows"}
-            </p>
-            <Button variant="outline" className="sq-admin-action-btn" onClick={handleFlip}>
-              Flip Grid Orientation
-            </Button>
-          </div>
-
+        <TabsContent value="settings" className="admin-folder-sheet sq-admin-sheet-settings">
           <div className="sq-admin-section">
             <h4 className="admin-section-title">CSV Exports</h4>
             <div className="admin-backup-row">

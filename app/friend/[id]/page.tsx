@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getState, setPick } from "@/lib/store"
+import { getState, setPick, randomizePicks } from "@/lib/store"
 import { getSquaresState, getPlayerLimit, getPlayerClaimedCount } from "@/lib/squaresStore"
 import { PropQuestion } from "@/components/PropQuestion"
 import { Footer } from "@/components/footer"
@@ -59,6 +59,14 @@ export default function FriendPicksPage() {
   const answeredCount = Object.keys(picks).length
   const totalCount = props.length
 
+  const handleRandom = () => {
+    if (locked) return
+    randomizePicks(friendId)
+    const state = getState()
+    const f = state.friends.find((fr) => fr.id === friendId)
+    if (f) setPicks({ ...f.picks })
+  }
+
   return (
     <div className="page-root">
       <div className="picks-page">
@@ -70,8 +78,19 @@ export default function FriendPicksPage() {
           </button>
         </div>
         <div className="picks-name-row">
-          <h1 className="picks-friend-name">{friend.name}</h1>
-          <p className="picks-subtitle">Making picks</p>
+          <div className="picks-name-row-left">
+            <h1 className="picks-friend-name">{friend.name}</h1>
+            <p className="picks-subtitle">Making picks</p>
+          </div>
+          {!locked && (
+            <Button
+              variant="outline"
+              className="picks-action-btn picks-action-btn-secondary"
+              onClick={handleRandom}
+            >
+              RANDOM
+            </Button>
+          )}
         </div>
 
         <div className="picks-progress">

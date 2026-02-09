@@ -2,6 +2,7 @@ export interface SquaresPlayer {
   id: string
   name: string
   color: string
+  initials?: string
 }
 
 export interface Square {

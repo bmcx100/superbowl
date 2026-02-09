@@ -127,6 +127,15 @@ export function updatePlayerColor(playerId: string, color: string): void {
   }
 }
 
+export function updatePlayerInitials(playerId: string, initials: string): void {
+  const state = getSquaresState()
+  const player = state.players.find((p) => p.id === playerId)
+  if (player) {
+    player.initials = initials.slice(0, 3).toUpperCase()
+    saveSquaresState(state)
+  }
+}
+
 // Step 1.4 — Allocation computation
 export function getBaseLimit(playerCount: number): number {
   if (playerCount === 0) return 0

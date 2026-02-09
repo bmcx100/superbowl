@@ -13,6 +13,7 @@ import {
   getPlayerLimit,
   getPlayerClaimedCount,
   canPlayerClaim,
+  autoFillPlayer,
 } from "@/lib/squaresStore"
 import { getState } from "@/lib/store"
 import { getContrastColor } from "@/lib/squaresColors"
@@ -49,13 +50,11 @@ export default function ClaimPage() {
     if (!sq) return
 
     if (sq.ownerId === playerId) {
-      // Unclaim own square
       unclaimSquare(playerId, row, col)
     } else if (sq.ownerId === null) {
       if (!canPlayerClaim(state, playerId)) return
       claimSquare(playerId, row, col)
     }
-    // If owned by another player, do nothing
 
     loadState()
   }
@@ -75,26 +74,61 @@ export default function ClaimPage() {
         return
       }
     }
-    router.back()
+    router.push("/squares")
+  }
+
+  const handleRandom = () => {
+    autoFillPlayer(playerId)
+    loadState()
   }
 
   return (
     <div className="page-root">
-      <section className="squares-page">
-        <div className="sq-claim-info">
-          <div
-            className="sq-claim-color"
-            style={{ backgroundColor: player.color, color: getContrastColor(player.color) }}
-          >
-            {player.name.charAt(0).toUpperCase()}
+      <div className="picks-page">
+        <div className="picks-divider-top" />
+        <div className="sq-claim-top-row">
+          <button className="picks-back" onClick={() => router.push("/squares")}>
+            <ArrowLeft size={28} />
+            <span>Back</span>
+          </button>
+          <div className="sq-claim-progress-inline">
+            <div className="picks-progress-bar">
+              <div
+                className="picks-progress-fill"
+                style={{ width: `${limit > 0 ? (claimed / limit) * 100 : 0}%` }}
+              />
+            </div>
+            <span className="picks-progress-text">
+              {claimed} / {limit}
+            </span>
           </div>
-          <div className="sq-claim-details">
-            <h1 className="sq-claim-name">Claiming for: {player.name}</h1>
-            <p className="sq-claim-count">Claimed: {claimed} / {limit}</p>
+        </div>
+
+        <div className="sq-claim-name-actions">
+          <div className="sq-claim-name-row">
+            <div
+              className="sq-claim-color"
+              style={{ backgroundColor: player.color, color: getContrastColor(player.color) }}
+            >
+              {player.initials ?? player.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="sq-claim-name-text">
+              <h1 className="picks-friend-name">{player.name}</h1>
+              <p className="picks-subtitle">Claiming squares</p>
+            </div>
           </div>
-          <Button className="picks-action-btn" onClick={handleSubmit}>
-            SUBMIT
-          </Button>
+          <div className="sq-claim-actions">
+            <Button
+              variant="outline"
+              className="picks-action-btn picks-action-btn-secondary"
+              onClick={handleRandom}
+            >
+              RANDOM
+            </Button>
+            <Button className="picks-action-btn" onClick={handleSubmit}>
+              SUBMIT
+            </Button>
+          </div>
         </div>
 
         <SquaresGrid
@@ -103,7 +137,8 @@ export default function ClaimPage() {
           onCellClick={handleCellClick}
           claimingPlayerId={playerId}
         />
-      </section>
+      </div>
+
       <Footer />
     </div>
   )

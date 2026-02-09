@@ -38,7 +38,7 @@ export function PlayerSelector({ state, onClose }: PlayerSelectorProps) {
               className="sq-player-color"
               style={{ backgroundColor: player.color, color: getContrastColor(player.color) }}
             >
-              {player.name.charAt(0).toUpperCase()}
+              {player.initials ?? player.name.charAt(0).toUpperCase()}
             </div>
             <div className="sq-player-info">
               <span className="sq-player-name">{player.name}</span>

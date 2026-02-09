@@ -24,7 +24,7 @@ export function SquareCell({ owner, winnerLabel, onClick, interactive, highlight
   const isActive = highlighted === true
   const bgColor = isActive ? owner.color : "#d1d5db"
   const textColor = isActive ? getContrastColor(owner.color) : "#555"
-  const initial = owner.name.charAt(0).toUpperCase()
+  const initial = owner.initials ?? owner.name.charAt(0).toUpperCase()
 
   return (
     <div

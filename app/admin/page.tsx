@@ -29,6 +29,7 @@ import {
   saveState,
   lockProps,
   unlockProps,
+  areAllFriendsComplete,
   clearAllPicks,
   clearAllResults,
   clearAllFriends,
@@ -296,7 +297,20 @@ export default function AdminPage() {
         <>
           <LockOpen size={20} />
           <span>Props are unlocked</span>
-          <Button className="picks-action-btn" onClick={() => { lockProps(); refresh() }}>
+          <Button className="picks-action-btn" onClick={() => {
+            if (!areAllFriendsComplete()) {
+              setConfirmAction({
+                title: "Not everyone has picked",
+                description: "Some friends haven't finished making their picks. Are you sure you want to lock?",
+                confirmLabel: "Lock Anyway",
+                variant: "default",
+                onConfirm: () => { lockProps(); refresh() },
+              })
+            } else {
+              lockProps()
+              refresh()
+            }
+          }}>
             Lock Picks
           </Button>
         </>

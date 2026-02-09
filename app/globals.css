@@ -980,7 +980,7 @@
 }
 
 .picks-locked-view {
-  @apply flex flex-col w-full mx-auto;
+  @apply flex flex-col items-center w-full mx-auto;
   max-width: 1400px;
 }
 
@@ -988,6 +988,7 @@
   @apply w-full;
   margin-top: 8px;
 }
+
 
 .picks-locked-tabs-list {
   @apply w-full;
@@ -1002,6 +1003,10 @@
   font-size: 1.6rem;
   height: auto !important;
   padding: 8px 24px;
+}
+
+.picks-locked-tabs [data-slot="tabs-content"] {
+  @apply flex justify-center;
 }
 
 .picks-locked-view .admin-prop-order {
@@ -1637,6 +1642,7 @@
   color: #1a1d24 !important;
 }
 
+
 .light .admin-sub-sheet-friends {
   background: #f2f3f6;
 }
@@ -1648,6 +1654,7 @@
 .light .admin-sub-sheet-settings {
   background: #f8f9fb;
 }
+
 
 /* Add friend form */
 .admin-add-form {
@@ -1952,10 +1959,14 @@
 }
 
 .picks-name-row {
-  @apply flex flex-col;
+  @apply flex items-center justify-between;
   padding: 16px 0 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   margin-bottom: 24px;
+}
+
+.picks-name-row-left {
+  @apply flex flex-col;
 }
 
 .picks-back {
@@ -2332,7 +2343,7 @@
 
 /* --- Grid wrapper --- */
 .sq-grid-wrapper {
-  @apply flex flex-col;
+  @apply flex flex-col items-center;
   max-width: 100%;
   overflow-x: auto;
 }
@@ -2699,7 +2710,48 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+/* --- Squares card swatch (player list) --- */
+.sq-card-swatch {
+  @apply flex items-center justify-center flex-shrink-0;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
 /* --- Claiming page --- */
+.sq-claim-top-row {
+  @apply flex items-center gap-4;
+  padding: 48px 0 16px;
+}
+
+.sq-claim-progress-inline {
+  @apply flex items-center gap-3 flex-1;
+  min-width: 0;
+}
+
+.sq-claim-name-actions {
+  @apply flex items-center justify-between;
+  padding: 8px 0 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 24px;
+}
+
+.sq-claim-name-row {
+  @apply flex items-center gap-4;
+}
+
+.sq-claim-name-text {
+  @apply flex flex-col;
+}
+
+.sq-claim-actions {
+  @apply flex items-center gap-3;
+  flex-shrink: 0;
+}
+
 .sq-claim-header {
   @apply flex w-full;
   max-width: 900px;
@@ -2793,6 +2845,21 @@
   height: 20px;
   border-radius: 4px;
   flex-shrink: 0;
+}
+
+.sq-admin-initials-input {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: none;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  padding: 0;
+  cursor: text;
 }
 
 .sq-admin-claimed-count {
@@ -3381,6 +3448,10 @@
 
 .light .sq-claim-name {
   color: #1a1d24;
+}
+
+.light .sq-claim-name-actions {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
 }
 
 .light .sq-admin-stats {
