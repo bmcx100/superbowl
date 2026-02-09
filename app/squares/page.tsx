@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { LockOpen } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
@@ -25,13 +25,22 @@ export default function SquaresPage() {
   const [state, setState] = useState<SquaresState | null>(null)
   const [confirmPlayer, setConfirmPlayer] = useState<SquaresPlayer | null>(null)
 
+  const refresh = useCallback(() => setState(getSquaresState()), [])
+
   useEffect(() => {
-    setState(getSquaresState())
-  }, [])
+    refresh()
+    const onFocus = () => refresh()
+    window.addEventListener("focus", onFocus)
+    return () => window.removeEventListener("focus", onFocus)
+  }, [refresh])
 
   if (!state) return null
 
-  const allFull = !state.locked && getUnclaimedCount(state) === 0
+  const unclaimed = getUnclaimedCount(state)
+  const allFull = !state.locked && unclaimed === 0
+  const allPlayersFull = !state.locked && !allFull && state.players.length > 0 && state.players.every(
+    (p) => getPlayerClaimedCount(state, p.id) >= getPlayerLimit(state, p.id)
+  )
 
   const handleLock = () => {
     lockBoard()
@@ -56,6 +65,12 @@ export default function SquaresPage() {
           <h2 className="friends-title">Super Bowl LX Squares</h2>
         </div>
 
+        {allPlayersFull && (
+          <div className="picks-complete-banner">
+            <span>All users selected, but {unclaimed} squares still available. Go to Admin Panel → Squares → Board to assign extra squares.</span>
+          </div>
+        )}
+
         {allFull && (
           <div className="picks-complete-banner">
             <LockOpen size={20} />
@@ -79,7 +94,7 @@ export default function SquaresPage() {
               </TabsContent>
 
               <TabsContent value="winners">
-                <WinnersDisplay winners={state.winners} />
+                <WinnersDisplay state={state} onUpdate={refresh} />
               </TabsContent>
             </Tabs>
           </div>

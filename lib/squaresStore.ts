@@ -321,16 +321,9 @@ export function computeWinner(
   const patriotsDigit = patriotsScore % 10
   const seahawksDigit = seahawksScore % 10
 
-  let colIndex: number
-  let rowIndex: number
-
-  if (state.orientation === "patriots-cols") {
-    colIndex = state.colNumbers.indexOf(patriotsDigit)
-    rowIndex = state.rowNumbers.indexOf(seahawksDigit)
-  } else {
-    colIndex = state.colNumbers.indexOf(seahawksDigit)
-    rowIndex = state.rowNumbers.indexOf(patriotsDigit)
-  }
+  // Patriots last digit → row, Seahawks last digit → column
+  const rowIndex = state.rowNumbers.indexOf(patriotsDigit)
+  const colIndex = state.colNumbers.indexOf(seahawksDigit)
 
   const sq = getSquare(state, rowIndex, colIndex)
   if (!sq) return null

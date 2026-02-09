@@ -28,18 +28,12 @@ export function SquaresGrid({ state, onCellClick, onEmptyCellClick, interactive,
   for (const p of players) playerMap.set(p.id, p)
 
   // Build winner map: row-col key -> checkpoint label
+  // Patriots last digit → row, Seahawks last digit → column
   const winnerMap = new Map<string, string>()
   for (const w of winners) {
     if (!colNumbers || !rowNumbers) continue
-    let winCol: number
-    let winRow: number
-    if (orientation === "patriots-cols") {
-      winCol = colNumbers.indexOf(w.patriotsDigit)
-      winRow = rowNumbers.indexOf(w.seahawksDigit)
-    } else {
-      winCol = colNumbers.indexOf(w.seahawksDigit)
-      winRow = rowNumbers.indexOf(w.patriotsDigit)
-    }
+    const winRow = rowNumbers.indexOf(w.patriotsDigit)
+    const winCol = colNumbers.indexOf(w.seahawksDigit)
     winnerMap.set(`${winRow}-${winCol}`, w.checkpoint)
   }
 

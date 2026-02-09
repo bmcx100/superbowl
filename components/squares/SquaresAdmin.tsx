@@ -30,18 +30,12 @@ import {
   unlockBoard,
   canRandomize,
   randomizeNumbers,
-  computeWinner,
-  recordWinner,
-  clearWinner,
   adminClearSquare,
   exportSquaresBackup,
   importSquaresBackup,
   isBaseRoundComplete,
 } from "@/lib/squaresStore"
 import type { SquaresState } from "@/lib/squaresTypes"
-import type { ComputeWinnerResult } from "@/lib/squaresStore"
-
-const CHECKPOINTS: ("Q1" | "Q2" | "Q3" | "Final")[] = ["Q1", "Q2", "Q3", "Final"]
 
 export function SquaresAdmin() {
   const [sqState, setSqState] = useState<SquaresState | null>(null)
@@ -50,9 +44,6 @@ export function SquaresAdmin() {
   const [renameId, setRenameId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState("")
   const [placingForId, setPlacingForId] = useState<string | null>(null)
-  const [scores, setScores] = useState<Record<string, { patriots: string; seahawks: string }>>({})
-  const [computedResult, setComputedResult] = useState<ComputeWinnerResult | null>(null)
-  const [confirmingCheckpoint, setConfirmingCheckpoint] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [confirmAction, setConfirmAction] = useState<{
@@ -284,43 +275,6 @@ export function SquaresAdmin() {
     })
   }
 
-  // --- Section D: Scoring ---
-  const getScore = (cp: string) => scores[cp] ?? { patriots: "", seahawks: "" }
-
-  const handleComputeWinner = (cp: "Q1" | "Q2" | "Q3" | "Final") => {
-    const s = getScore(cp)
-    const pScore = parseInt(s.patriots)
-    const sScore = parseInt(s.seahawks)
-    if (isNaN(pScore) || isNaN(sScore)) return
-    const result = computeWinner(cp, pScore, sScore)
-    if (!result) return
-    setComputedResult(result)
-    setConfirmingCheckpoint(cp)
-  }
-
-  const handleRecordWinner = () => {
-    if (!computedResult || !confirmingCheckpoint) return
-    const s = getScore(confirmingCheckpoint)
-    recordWinner(
-      computedResult.checkpoint,
-      parseInt(s.patriots),
-      parseInt(s.seahawks)
-    )
-    setComputedResult(null)
-    setConfirmingCheckpoint(null)
-    refresh()
-  }
-
-  const handleClearWinner = (cp: "Q1" | "Q2" | "Q3" | "Final") => {
-    setConfirmAction({
-      title: `Clear ${cp} winner?`,
-      description: `Remove the recorded winner for ${cp}?`,
-      confirmLabel: "Clear",
-      variant: "destructive",
-      onConfirm: () => { clearWinner(cp); refresh() },
-    })
-  }
-
   // --- Section E: Settings ---
   const handleExportBoardCSV = () => {
     const header = ["", ...(sqState.colNumbers ?? Array(10).fill("?")).map(String)]
@@ -415,7 +369,6 @@ export function SquaresAdmin() {
           <TabsTrigger value="players" className="admin-tab-trigger">Players</TabsTrigger>
           <TabsTrigger value="board" className="admin-tab-trigger">Board</TabsTrigger>
           <TabsTrigger value="numbers" className="admin-tab-trigger">Numbers</TabsTrigger>
-          <TabsTrigger value="scoring" className="admin-tab-trigger">Scoring</TabsTrigger>
           <TabsTrigger value="settings" className="admin-tab-trigger">Settings</TabsTrigger>
         </TabsList>
 
@@ -666,68 +619,6 @@ export function SquaresAdmin() {
           </div>
         </TabsContent>
 
-        {/* Section D: Scoring */}
-        <TabsContent value="scoring" className="admin-folder-sheet sq-admin-sheet-scoring">
-          {!numbersReady && (
-            <p className="sq-admin-hint">Randomize numbers before scoring.</p>
-          )}
-          {numbersReady && (
-            <div className="sq-admin-scoring">
-              {CHECKPOINTS.map((cp) => {
-                const existing = sqState.winners.find((w) => w.checkpoint === cp)
-                const s = getScore(cp)
-                return (
-                  <div key={cp} className="sq-admin-score-row">
-                    <span className="sq-admin-score-label">{cp}</span>
-                    {existing ? (
-                      <div className="sq-admin-score-result">
-                        <span>Patriots {existing.patriotsScore} – Seahawks {existing.seahawksScore}</span>
-                        <span className="sq-admin-score-winner">Winner: {existing.winningPlayerName}</span>
-                        <Button variant="outline" className="admin-action-btn" onClick={() => handleClearWinner(cp)}>
-                          Clear
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="sq-admin-score-inputs">
-                        <Input
-                          className="sq-admin-score-input"
-                          type="number"
-                          placeholder="PAT"
-                          value={s.patriots}
-                          onChange={(e) => setScores({ ...scores, [cp]: { ...s, patriots: e.target.value } })}
-                        />
-                        <Input
-                          className="sq-admin-score-input"
-                          type="number"
-                          placeholder="SEA"
-                          value={s.seahawks}
-                          onChange={(e) => setScores({ ...scores, [cp]: { ...s, seahawks: e.target.value } })}
-                        />
-                        <Button className="admin-action-btn" onClick={() => handleComputeWinner(cp)}>
-                          Compute
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          {/* Winners list */}
-          {sqState.winners.length > 0 && (
-            <div className="sq-admin-section">
-              <h4 className="admin-section-title">Recorded Winners</h4>
-              {sqState.winners.map((w) => (
-                <div key={w.checkpoint} className="sq-admin-winner-row">
-                  <span className="sq-admin-score-label">{w.checkpoint}</span>
-                  <span>{w.winningPlayerName} — Patriots {w.patriotsScore}, Seahawks {w.seahawksScore}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
         {/* Section E: Settings */}
         <TabsContent value="settings" className="admin-folder-sheet sq-admin-sheet-settings">
           <div className="sq-admin-section">
@@ -762,39 +653,6 @@ export function SquaresAdmin() {
           </div>
         </TabsContent>
       </Tabs>
-
-      {/* Computed winner confirmation */}
-      <ConfirmDialog
-        open={computedResult !== null && confirmingCheckpoint !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setComputedResult(null)
-            setConfirmingCheckpoint(null)
-          }
-        }}
-        title={
-          computedResult?.unclaimed
-            ? `${confirmingCheckpoint} — Unclaimed Square`
-            : `Record ${confirmingCheckpoint} Winner?`
-        }
-        description={
-          computedResult?.unclaimed
-            ? `The winning square [${computedResult.row},${computedResult.col}] is unclaimed. Cannot record a winner for this checkpoint.`
-            : computedResult
-              ? `Winner: ${computedResult.playerName} (Patriots ${computedResult.patriotsDigit}, Seahawks ${computedResult.seahawksDigit} → Square [${computedResult.row},${computedResult.col}]). Record ${computedResult.playerName} as the ${confirmingCheckpoint} winner?`
-              : ""
-        }
-        confirmLabel={computedResult?.unclaimed ? "OK" : "Record"}
-        variant="default"
-        onConfirm={() => {
-          if (computedResult?.unclaimed) {
-            setComputedResult(null)
-            setConfirmingCheckpoint(null)
-          } else {
-            handleRecordWinner()
-          }
-        }}
-      />
 
       {/* General confirm dialog */}
       <ConfirmDialog

@@ -21,20 +21,24 @@ export function Leaderboard({ entries }: LeaderboardProps) {
     )
   }
 
-  // Compute tied ranks
+  // Compute tied ranks and group positions
   const ranks: number[] = []
+  const groups: number[] = []
+  let groupNum = 0
   for (let i = 0; i < entries.length; i++) {
     if (i === 0 || entries[i].correct !== entries[i - 1].correct) {
       ranks.push(i + 1)
+      groupNum++
     } else {
       ranks.push(ranks[i - 1])
     }
+    groups.push(groupNum)
   }
 
-  const getPodiumClass = (rank: number) => {
-    if (rank === 1) return "leaderboard-top1"
-    if (rank === 2) return "leaderboard-top2"
-    if (rank === 3) return "leaderboard-top3"
+  const getPodiumClass = (group: number) => {
+    if (group === 1) return "leaderboard-top1"
+    if (group === 2) return "leaderboard-top2"
+    if (group === 3) return "leaderboard-top3"
     return ""
   }
 
@@ -74,7 +78,7 @@ export function Leaderboard({ entries }: LeaderboardProps) {
         <tbody>
           {entries.map((entry, i) => {
             const rank = ranks[i]
-            const podium = getPodiumClass(rank)
+            const podium = getPodiumClass(groups[i])
             const isExpanded = expandedId === entry.id
             const friend = state.friends.find((f) => f.id === entry.id)
 
