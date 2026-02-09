@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Lock, LockOpen } from "lucide-react"
+import { LockOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Footer } from "@/components/footer"
@@ -13,7 +13,6 @@ import {
   getState,
   areAllFriendsComplete,
   lockProps,
-  unlockProps,
   setCorrectAnswer,
   getLeaderboard,
 } from "@/lib/store"
@@ -50,11 +49,6 @@ export default function PicksPage() {
     refresh()
   }
 
-  const handleUnlock = () => {
-    unlockProps()
-    refresh()
-  }
-
   const handleScore = (propId: string, value: "A" | "B" | null) => {
     setCorrectAnswer(propId, value)
     refresh()
@@ -66,6 +60,24 @@ export default function PicksPage() {
     ? [...appState.props].sort((a, b) => a.order - b.order)
     : []
 
+  // Compute pick percentages per prop
+  const pickPcts = new Map<string, { a: number; b: number }>()
+  if (isLocked && appState) {
+    const total = appState.friends.length
+    for (const prop of appState.props) {
+      let aCount = 0
+      let bCount = 0
+      for (const friend of appState.friends) {
+        if (friend.picks[prop.id] === "A") aCount++
+        else if (friend.picks[prop.id] === "B") bCount++
+      }
+      pickPcts.set(prop.id, {
+        a: total > 0 ? Math.round((aCount / total) * 100) : 0,
+        b: total > 0 ? Math.round((bCount / total) * 100) : 0,
+      })
+    }
+  }
+
   return (
     <div className="page-root">
       {appState && (
@@ -76,14 +88,6 @@ export default function PicksPage() {
 
           {isLocked ? (
             <div className="picks-locked-view">
-              <div className="picks-complete-banner">
-                <Lock size={20} />
-                <span>All picks are locked in!</span>
-                <Button variant="outline" className="picks-action-btn picks-action-btn-secondary" onClick={handleUnlock}>
-                  Unlock
-                </Button>
-              </div>
-
               <Tabs defaultValue="scoring" className="picks-locked-tabs">
                 <TabsList className="picks-locked-tabs-list">
                   <TabsTrigger value="scoring">Scoring</TabsTrigger>
@@ -92,30 +96,35 @@ export default function PicksPage() {
 
                 <TabsContent value="scoring">
                   <div className="admin-scoring-list">
-                    {sortedProps.map((prop, i) => (
-                      <div key={prop.id} className="admin-scoring-row">
-                        <div className="admin-scoring-info">
-                          <span className="admin-prop-order">{i + 1}</span>
-                          <span className="admin-prop-question">{prop.question}</span>
+                    {sortedProps.map((prop, i) => {
+                      const pcts = pickPcts.get(prop.id)
+                      return (
+                        <div key={prop.id} className="admin-scoring-row">
+                          <div className="admin-scoring-info">
+                            <span className="admin-prop-order">{i + 1}</span>
+                            <span className="admin-prop-question">{prop.question}</span>
+                          </div>
+                          <div className="admin-scoring-buttons">
+                            <Button
+                              variant={prop.correctAnswer === "A" ? "default" : "outline"}
+                              className={`admin-score-btn ${prop.correctAnswer === "A" ? "admin-score-active" : ""}`}
+                              onClick={() => handleScore(prop.id, prop.correctAnswer === "A" ? null : "A")}
+                            >
+                              {prop.optionA}
+                              <span className="scoring-pct">{pcts?.a}%</span>
+                            </Button>
+                            <Button
+                              variant={prop.correctAnswer === "B" ? "default" : "outline"}
+                              className={`admin-score-btn ${prop.correctAnswer === "B" ? "admin-score-active" : ""}`}
+                              onClick={() => handleScore(prop.id, prop.correctAnswer === "B" ? null : "B")}
+                            >
+                              {prop.optionB}
+                              <span className="scoring-pct">{pcts?.b}%</span>
+                            </Button>
+                          </div>
                         </div>
-                        <div className="admin-scoring-buttons">
-                          <Button
-                            variant={prop.correctAnswer === "A" ? "default" : "outline"}
-                            className={`admin-score-btn ${prop.correctAnswer === "A" ? "admin-score-active" : ""}`}
-                            onClick={() => handleScore(prop.id, prop.correctAnswer === "A" ? null : "A")}
-                          >
-                            {prop.optionA}
-                          </Button>
-                          <Button
-                            variant={prop.correctAnswer === "B" ? "default" : "outline"}
-                            className={`admin-score-btn ${prop.correctAnswer === "B" ? "admin-score-active" : ""}`}
-                            onClick={() => handleScore(prop.id, prop.correctAnswer === "B" ? null : "B")}
-                          >
-                            {prop.optionB}
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </TabsContent>
 

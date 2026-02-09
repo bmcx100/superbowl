@@ -157,6 +157,7 @@ export function setCorrectAnswer(
 // --- Scoring ---
 
 export interface LeaderboardEntry {
+  id: string
   name: string
   correct: number
   scored: number
@@ -177,7 +178,7 @@ export function getLeaderboard(): LeaderboardEntry[] {
       }
       const scored = scoredProps.length
       const accuracy = scored > 0 ? correct / scored : 0
-      return { name: friend.name, correct, scored, accuracy }
+      return { id: friend.id, name: friend.name, correct, scored, accuracy }
     })
     .sort((a, b) => b.correct - a.correct)
 }

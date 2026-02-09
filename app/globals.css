@@ -992,16 +992,16 @@
 .picks-locked-tabs-list {
   @apply w-full;
   font-family: var(--font-display);
-  font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  height: auto;
-  padding: 8px 0;
+  height: auto !important;
+  padding: 4px;
 }
 
 .picks-locked-tabs-list [role="tab"] {
   font-size: 1.6rem;
-  padding: 12px 24px;
+  height: auto !important;
+  padding: 8px 24px;
 }
 
 .picks-locked-view .admin-prop-order {
@@ -1225,6 +1225,63 @@
   color: #ffffff !important;
   font-size: 1.3rem !important;
   font-weight: 700;
+}
+
+.leaderboard-clickable {
+  cursor: pointer;
+}
+
+.leaderboard-chevron {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 8px;
+  opacity: 0.5;
+}
+
+.leaderboard-picks-row td {
+  padding: 0 20px 16px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.leaderboard-picks {
+  @apply flex flex-col gap-2;
+  padding: 12px 0;
+}
+
+.leaderboard-pick-item {
+  @apply flex items-center gap-3;
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 1rem;
+}
+
+.leaderboard-pick-num {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  min-width: 28px;
+}
+
+.leaderboard-pick-question {
+  @apply flex-1;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.leaderboard-pick-answer {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.leaderboard-pick-correct {
+  color: var(--sb-green) !important;
+}
+
+.leaderboard-pick-wrong {
+  color: #e05050 !important;
+}
+
+.leaderboard-pick-pct {
+  font-size: 0.8em;
+  opacity: 0.5;
+  margin-left: 12px;
 }
 
 .leaderboard-empty {
@@ -1762,6 +1819,12 @@
   background: rgba(139, 197, 63, 0.2) !important;
   border-color: var(--sb-green) !important;
   color: var(--sb-green) !important;
+}
+
+.scoring-pct {
+  font-size: 0.8em;
+  opacity: 0.6;
+  margin-left: 6px;
 }
 
 .admin-scoring-leaderboard {
@@ -3187,6 +3250,26 @@
 
 .light .leaderboard-empty {
   color: rgba(0, 0, 0, 0.4);
+}
+
+.light .leaderboard-picks-row td {
+  border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+.light .leaderboard-pick-num {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.light .leaderboard-pick-question {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.light .leaderboard-pick-answer {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.light .leaderboard-pick-wrong {
+  color: #c03030 !important;
 }
 
 /* --- Picks page light --- */
