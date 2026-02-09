@@ -1,9 +1,7 @@
 import type { Friend } from "./types"
 
 const DEFAULT_FRIEND_NAMES = [
-  "Mike", "Giovi", "Angie", "Edward", "Sam",
-  "Gigi", "Ryan", "Daniella", "Dean", "Julz",
-  "Izzy", "Mac", "Jax", "Hanna", "Madison",
+  "Mike", "Edward", "Angie", "Sam", "Mark", "Dean",
 ]
 
 export const DEFAULT_FRIENDS: Friend[] = DEFAULT_FRIEND_NAMES.map(
