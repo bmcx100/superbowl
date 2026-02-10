@@ -115,6 +115,7 @@
 .page-root {
   @apply flex flex-col min-h-screen;
   background: var(--sb-dark);
+  overflow-x: hidden;
 }
 
 /* =================================================================
@@ -3511,6 +3512,7 @@
   text-transform: uppercase;
   padding: 12px 16px;
   text-align: left;
+  white-space: nowrap;
   border-bottom: 2px solid rgba(0, 200, 240, 0.2);
 }
 
@@ -3528,13 +3530,29 @@
   color: var(--sb-gold) !important;
 }
 
-.sq-winners-score-input {
-  width: 70px !important;
-  text-align: center !important;
-  font-family: var(--font-barlow), sans-serif !important;
-  font-size: 1.05rem !important;
-  padding: 6px 8px !important;
-  height: auto !important;
+.sq-winners-score-select {
+  width: 70px;
+  text-align: center;
+  font-family: var(--font-barlow), sans-serif;
+  font-size: 1.05rem;
+  padding: 6px 8px;
+  height: auto;
+  background: var(--sb-surface-2);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2300c8f0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  padding-right: 22px;
+}
+
+.sq-winners-score-select:focus {
+  outline: none;
+  border-color: var(--sb-cyan);
 }
 
 .sq-winners-digit {
@@ -4395,6 +4413,15 @@
   color: #1a1d24 !important;
 }
 
+.light .sq-winners-score-select {
+  background: #f0f2f5;
+  color: #1a1d24;
+  border-color: rgba(0, 0, 0, 0.12);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2300c8f0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+}
+
 .light .sq-player-card {
   background: #ffffff;
   border-color: rgba(0, 0, 0, 0.08);
@@ -4645,6 +4672,25 @@
 
   .splash-badge {
     margin-bottom: 28px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .badge-text span,
+  .badge-sub span {
+    display: block;
+  }
+
+  .badge-text {
+    text-align: right;
+    line-height: 1.1;
+  }
+
+  .badge-sub {
+    text-align: left;
+    line-height: 1.1;
   }
 
   .badge-text,
@@ -4820,12 +4866,14 @@
 
   .admin-friend-actions {
     width: 100%;
+    flex-wrap: wrap;
   }
 
   .admin-action-btn {
-    flex: 1;
+    flex: 1 1 calc(50% - 4px);
     font-size: 0.9rem !important;
     padding: 8px 10px !important;
+    min-width: 0;
   }
 
   .admin-scoring-row {
@@ -4997,5 +5045,110 @@
     grid-template-columns: 48px 36px 36px 68px 1fr;
     font-size: 0.8rem;
     padding: 8px 8px;
+  }
+
+  /* Squares grid — phone */
+  .sq-grid-wrapper {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  .sq-col-header {
+    padding-left: 26px;
+    max-width: 100%;
+  }
+
+  .sq-col-banner {
+    width: calc(28px * 10 + 20px);
+    max-width: calc(28px * 10 + 20px);
+  }
+
+  .sq-row-banner {
+    height: calc(28px * 10);
+    max-height: calc(28px * 10);
+  }
+
+  .sq-banner-img-vertical {
+    height: calc(28px * 10);
+    max-height: calc(28px * 10);
+  }
+
+  .sq-row-header {
+    max-height: calc(28px * 10);
+    margin-right: 2px;
+  }
+
+  .sq-number-corner {
+    width: 22px;
+    height: 22px;
+  }
+
+  .sq-number-cell {
+    width: 28px;
+    height: 22px;
+    font-size: 0.7rem;
+  }
+
+  .sq-numbers-row {
+    height: 22px;
+  }
+
+  .sq-row {
+    height: 28px;
+  }
+
+  .sq-row .sq-number-cell {
+    width: 22px;
+    height: 28px;
+  }
+
+  .sq-cell {
+    width: 28px;
+    height: 28px;
+  }
+
+  .sq-cell-initial {
+    font-size: 0.45rem;
+  }
+
+  .sq-cell-winner-badge {
+    font-size: 0.4rem;
+    padding: 1px 2px;
+  }
+
+  .sq-grid-inner {
+    border-width: 2px;
+  }
+
+  .sq-remaining-count {
+    font-size: 1.3rem;
+  }
+
+  .sq-remaining-sub {
+    font-size: 0.95rem;
+  }
+
+  .sq-winners {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .sq-winners-table th,
+  .sq-winners-table td {
+    padding: 8px 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .sq-winners-score-select {
+    width: 52px;
+    font-size: 0.8rem;
+    padding: 4px 18px 4px 4px;
+    background-position: right 2px center;
+  }
+
+  .sq-winners-save-btn {
+    font-size: 0.75rem !important;
+    padding: 3px 8px !important;
   }
 }

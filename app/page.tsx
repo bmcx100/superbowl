@@ -29,9 +29,9 @@ export default function Home() {
         <main className="splash-content">
           {/* Top badge */}
           <div className="splash-badge">
-            <span className="badge-text">SUPER BOWL LX</span>
+            <span className="badge-text"><span>SUPER</span><span>BOWL&nbsp;LX</span></span>
             <span className="badge-divider" />
-            <span className="badge-sub">PARTY PICKS</span>
+            <span className="badge-sub"><span>PARTY</span><span>PICKS</span></span>
           </div>
 
           {/* Hero image area */}

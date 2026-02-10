@@ -1,9 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { getSquare, recordWinner, clearWinner } from "@/lib/squaresStore"
+import { getSquare } from "@/lib/squaresStore"
 import type { SquaresState } from "@/lib/squaresTypes"
 
 interface WinnersDisplayProps {
@@ -35,7 +33,7 @@ function lookupWinner(state: SquaresState, patriotsScore: number, seahawksScore:
   }
 }
 
-export function WinnersDisplay({ state, onUpdate }: WinnersDisplayProps) {
+export function WinnersDisplay({ state }: WinnersDisplayProps) {
   const [scores, setScores] = useState<Record<string, { patriots: string; seahawks: string }>>(() => {
     const initial: Record<string, { patriots: string; seahawks: string }> = {}
     for (const w of state.winners) {
@@ -55,13 +53,12 @@ export function WinnersDisplay({ state, onUpdate }: WinnersDisplayProps) {
       <table className="sq-winners-table">
         <thead>
           <tr>
-            <th>Checkpoint</th>
+            <th>Point</th>
             <th>Patriots</th>
             <th>Seahawks</th>
             <th>Row #</th>
             <th>Col #</th>
             <th>Winner</th>
-            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -78,22 +75,28 @@ export function WinnersDisplay({ state, onUpdate }: WinnersDisplayProps) {
               <tr key={cp}>
                 <td className="sq-winners-checkpoint">{cp}</td>
                 <td>
-                  <Input
-                    className="sq-winners-score-input"
-                    type="number"
-                    placeholder="—"
+                  <select
+                    className="sq-winners-score-select"
                     value={s.patriots}
                     onChange={(e) => setScores({ ...scores, [cp]: { ...s, patriots: e.target.value } })}
-                  />
+                  >
+                    <option value="">—</option>
+                    {Array.from({ length: 76 }, (_, i) => (
+                      <option key={i} value={String(i)}>{i}</option>
+                    ))}
+                  </select>
                 </td>
                 <td>
-                  <Input
-                    className="sq-winners-score-input"
-                    type="number"
-                    placeholder="—"
+                  <select
+                    className="sq-winners-score-select"
                     value={s.seahawks}
                     onChange={(e) => setScores({ ...scores, [cp]: { ...s, seahawks: e.target.value } })}
-                  />
+                  >
+                    <option value="">—</option>
+                    {Array.from({ length: 76 }, (_, i) => (
+                      <option key={i} value={String(i)}>{i}</option>
+                    ))}
+                  </select>
                 </td>
                 <td className="sq-winners-digit">
                   {hasScores ? pScore % 10 : "—"}
@@ -103,32 +106,6 @@ export function WinnersDisplay({ state, onUpdate }: WinnersDisplayProps) {
                 </td>
                 <td className="sq-winners-name">
                   {result ? (result.winner ?? "—") : "—"}
-                </td>
-                <td>
-                  {state.winners.some((w) => w.checkpoint === cp) ? (
-                    <Button
-                      variant="outline"
-                      className="sq-winners-save-btn"
-                      onClick={() => {
-                        clearWinner(cp)
-                        onUpdate?.()
-                      }}
-                    >
-                      Reset
-                    </Button>
-                  ) : (
-                    hasScores && result && result.winner && result.winner !== "Unclaimed" && (
-                      <Button
-                        className="sq-winners-save-btn"
-                        onClick={() => {
-                          recordWinner(cp, pScore, sScore)
-                          onUpdate?.()
-                        }}
-                      >
-                        Save
-                      </Button>
-                    )
-                  )}
                 </td>
               </tr>
             )

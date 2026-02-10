@@ -111,7 +111,7 @@ export default function SquaresPage() {
               </TabsContent>
 
               <TabsContent value="winners">
-                <WinnersDisplay state={state} onUpdate={refresh} />
+                <WinnersDisplay state={state} />
               </TabsContent>
             </Tabs>
           </div>
