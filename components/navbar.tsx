@@ -1,11 +1,14 @@
 "use client"
 
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Home, Settings } from "lucide-react"
 import { ThemeToggle } from "@/components/ThemeToggle"
 
 export function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false)
+
   return (
     <nav className="navbar">
       <div className="nav-ticker" aria-hidden="true">
@@ -26,7 +29,7 @@ export function Navbar() {
               className="nav-logo"
             />
             <div className="nav-title-group">
-              <span className="nav-title">PROP PICKS</span>
+              <span className="nav-title">PARTY PICKS</span>
               <span className="nav-subtitle">SUPER BOWL LX</span>
             </div>
           </Link>
@@ -40,8 +43,40 @@ export function Navbar() {
             </Link>
             <ThemeToggle />
           </div>
+
+          <button
+            className="nav-mobile-toggle"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+          >
+            <div className={`hamburger ${menuOpen ? "open" : ""}`}>
+              <span />
+              <span />
+              <span />
+            </div>
+          </button>
         </div>
       </div>
+
+      {menuOpen && (
+        <div className="nav-mobile-menu">
+          <Link href="/" className="nav-mobile-link" onClick={() => setMenuOpen(false)}>
+            Home
+          </Link>
+          <Link href="/picks" className="nav-mobile-link" onClick={() => setMenuOpen(false)}>
+            Props
+          </Link>
+          <Link href="/squares" className="nav-mobile-link" onClick={() => setMenuOpen(false)}>
+            Squares
+          </Link>
+          <Link href="/admin" className="nav-mobile-link" onClick={() => setMenuOpen(false)}>
+            Admin
+          </Link>
+          <div className="nav-mobile-bottom">
+            <ThemeToggle />
+          </div>
+        </div>
+      )}
     </nav>
   )
 }

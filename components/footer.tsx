@@ -26,7 +26,7 @@ export function Footer() {
               className="footer-logo"
             />
             <div className="footer-brand-text">
-              <span className="footer-title">PROP PICKS</span>
+              <span className="footer-title">PARTY PICKS</span>
               <span className="footer-tagline">Super Bowl LX &bull; New Orleans</span>
             </div>
           </div>
@@ -52,7 +52,7 @@ export function Footer() {
             This is a free, unofficial prop picking game. Not affiliated with the NFL, NBC, or any team.
           </p>
           <p className="footer-copy">
-            &copy; 2025 Prop Picks. For entertainment purposes only.
+            &copy; 2025 Party Picks. For entertainment purposes only.
           </p>
         </div>
       </div>

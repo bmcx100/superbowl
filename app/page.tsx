@@ -31,7 +31,7 @@ export default function Home() {
           <div className="splash-badge">
             <span className="badge-text">SUPER BOWL LX</span>
             <span className="badge-divider" />
-            <span className="badge-sub">PROP PICKS</span>
+            <span className="badge-sub">PARTY PICKS</span>
           </div>
 
           {/* Hero image area */}

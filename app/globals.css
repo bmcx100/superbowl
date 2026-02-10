@@ -348,7 +348,7 @@
 
 /* Mobile menu dropdown */
 .nav-mobile-menu {
-  @apply flex flex-col md:hidden;
+  @apply flex flex-col items-end md:hidden;
   padding: 20px 40px 32px;
   background: var(--sb-surface);
   border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -966,6 +966,11 @@
   text-transform: uppercase;
 }
 
+.page-back-row {
+  @apply flex justify-center;
+  padding: 32px 40px;
+}
+
 .friends-actions {
   @apply flex items-center gap-4;
 }
@@ -1004,6 +1009,12 @@
   font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: 0.03em;
+}
+
+.picks-banner-text {
+  @apply flex items-center gap-4;
+  flex: 1;
+  min-width: 0;
 }
 
 .picks-complete-banner .picks-action-btn {
@@ -4745,6 +4756,16 @@
     width: 100%;
   }
 
+  .picks-complete-banner {
+    flex-wrap: wrap;
+  }
+
+  .picks-complete-banner .picks-action-btn {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+  }
+
   .friends-action-btn {
     font-size: 1rem;
     padding: 10px 16px;
@@ -4879,6 +4900,11 @@
   .leaderboard-title {
     font-size: 1.8rem;
     margin-bottom: 24px;
+  }
+
+  .leaderboard-table {
+    width: 100%;
+    min-width: 0;
   }
 
   .leaderboard-table th {

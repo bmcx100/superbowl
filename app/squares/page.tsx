@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { LockOpen } from "lucide-react"
+import { ArrowLeft, LockOpen } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -69,10 +69,12 @@ export default function SquaresPage() {
 
         {allPlayersFull && (
           <div className="picks-complete-banner">
-            <LockOpen size={20} />
-            <span className="sq-remaining-msg">
-              <span className="sq-remaining-count">{unclaimed} Squares Remaining</span>
-              <span className="sq-remaining-sub">Randomly assign them or go to admin for manual entry</span>
+            <span className="picks-banner-text">
+              <LockOpen size={20} />
+              <span className="sq-remaining-msg">
+                <span className="sq-remaining-count">{unclaimed} Squares Remaining</span>
+                <span className="sq-remaining-sub">Randomly assign them or go to admin for manual entry</span>
+              </span>
             </span>
             <Button className="picks-action-btn" onClick={() => { randomizeRemaining(); refresh() }}>
               Randomize Remaining
@@ -82,12 +84,18 @@ export default function SquaresPage() {
 
         {allFull && (
           <div className="picks-complete-banner">
-            <LockOpen size={20} />
-            <span>All squares claimed! Ready to lock?</span>
+            <span className="picks-banner-text">
+              <LockOpen size={20} />
+              All squares claimed! Ready to lock?
+            </span>
             <Button className="picks-action-btn" onClick={handleLock}>
               Lock Board
             </Button>
           </div>
+        )}
+
+        {!state.locked && !allFull && !allPlayersFull && state.players.length > 0 && (
+          <p className="picks-instruction">Tap your name to start claiming squares</p>
         )}
 
         {state.locked ? (
@@ -161,6 +169,13 @@ export default function SquaresPage() {
           if (confirmPlayer) router.push(`/squares/claim/${confirmPlayer.id}`)
         }}
       />
+
+      <div className="page-back-row">
+        <button className="picks-back" onClick={() => router.push("/")}>
+          <ArrowLeft size={22} />
+          <span>Back</span>
+        </button>
+      </div>
 
       <Footer />
     </div>

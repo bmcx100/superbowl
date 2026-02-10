@@ -1,0 +1,458 @@
+# PARTY PICKS — Super Bowl LX
+
+## What It Is
+
+Party Picks is a Super Bowl party companion app. It runs two independent games — **Props** and **Squares** — that friends play together on a single shared device. There are no accounts, no logins, and no server. Everything is stored locally in the browser via localStorage. One person acts as the admin (game host) and passes the device around for others to make their picks and claim their squares.
+
+---
+
+## Tech Stack
+
+### Framework & Runtime
+- **Next.js 16.1.6** — App Router architecture
+- **React 19.2.3** — UI rendering
+- **TypeScript 5** — Strict mode enabled
+
+### Styling
+- **Tailwind CSS v4** — via `@tailwindcss/postcss` plugin
+- **Custom CSS** — ~5,000 lines in `app/globals.css`, dark-first design system
+- **CSS custom properties** — OKLCH color space theming with light/dark mode
+- **@apply directive** — Multi-class styling lives in CSS, not inline on elements (project convention: max 1 Tailwind class inline)
+
+### Component Library
+- **shadcn/ui** — New York style, 10 installed components:
+  - accordion, badge, button, card, dialog, input, label, scroll-area, separator, tabs
+- **Radix UI** — Headless primitives (via shadcn)
+- **Lucide React** — Icon library (0.563.0)
+
+### Utility Libraries
+- `clsx` + `tailwind-merge` — Class merging via `cn()` helper
+- `class-variance-authority` — Component variant definitions
+- `tw-animate-css` — Tailwind animation utilities
+
+### Fonts (Google Fonts)
+- **Oswald** (weights 400–700) — Display font for headings, titles, large labels
+- **Barlow Condensed** (weights 300–700) — Body text, UI text, descriptions
+
+### Data Persistence
+- **localStorage only** — No server, no database, no syncing
+- Two storage keys: `"sbProps"` (props game) and `"sbSquares"` (squares game)
+- Backup/restore via JSON export/import
+
+### Path Aliases
+- `@/*` maps to project root (tsconfig.json)
+
+### Dev Commands
+- `npm run dev` — Dev server (port 3000)
+- `npm run build` — Production build
+- `npm run lint` — ESLint with Next.js TypeScript rules
+
+### Coding Conventions
+- No semicolons in JS/TS
+- No inline Tailwind beyond 1 class — use `@apply` in CSS
+- `git switch -c` for new branches (not `git checkout`)
+
+---
+
+## Color Palette & Branding
+
+### Super Bowl LX Brand Colors
+| Token | Hex | Usage |
+|---|---|---|
+| `--sb-cyan` | #00c8f0 | Primary accent, links, active states, progress bars |
+| `--sb-magenta` | #e6007e | CTA buttons, highlights, destructive secondary |
+| `--sb-green` | #8bc53f | Seahawks team color, success states |
+| `--sb-gold` | #f0c808 | Leaderboard ranks, unanswered prop borders |
+| `--sb-red-bridge` | #d42035 | Destructive actions, Patriots accent |
+| `--sb-purple` | #8b2d8b | Chart accents |
+| `--sb-silver` | #c8cdd0 | Muted text, borders |
+| `--sb-dark` | #0a0c10 | Page background (dark mode) |
+
+### Surface Hierarchy (Dark Mode)
+| Token | Hex | Usage |
+|---|---|---|
+| `--sb-surface` | #111318 | Cards, sections |
+| `--sb-surface-2` | #181b22 | Nested cards, inputs |
+| `--sb-surface-3` | #1e222b | Hover states, deeper nesting |
+
+### Light Mode
+All surfaces flip to whites/light grays (#f2f4f7, #ffffff, #f0f2f5, #e8ebf0). Text goes dark (#1a1d24). Borders use `rgba(0,0,0,X)` instead of `rgba(255,255,255,X)`. Applied via `.light` class prefix pattern throughout CSS.
+
+### Squares Player Palette
+22 pre-defined colors assigned to squares players in order. Falls back to random RGB if all used:
+```
+#E63946, #1D3557, #2A9D8F, #E9C46A, #F4A261, #264653, #6A0572, #AB83A1,
+#D62828, #457B9D, #F77F00, #FCBF49, #3A86A7, #8338EC, #FF006E, #06D6A0,
+#118AB2, #EF476F, #073B4C, #7209B7, #B5179E, #4CC9F0
+```
+
+---
+
+## Animations
+
+| Name | Duration | Description |
+|---|---|---|
+| `ticker-scroll` | 20s infinite | Navbar ticker horizontal scroll |
+| `pulse-radial` | 4s alternate | Splash background radial glow pulse |
+| `yard-drift` | 8s infinite | Yard line markers floating |
+| `fade-slide-down` | 0.8s | Badge entrance (opacity + translateY) |
+| `fade-slide-up` | 0.7s | Matchup bar, CTA area entrance |
+| `hero-reveal` | 1s (0.15s delay) | Hero image scale + fade in |
+| `glow-pulse` | 3s infinite | Hero glow opacity/scale breathing |
+| `vs-pop` | 0.5s (0.7s delay) | VS badge scale pop (0 → 1.15 → 1) |
+| `shimmer` | 3s infinite | CTA button shimmer sweep |
+| `cta-nudge` | 3s (4s delay) | "Select A Game" bounce animation |
+| `mobile-menu-open` | 0.3s | Mobile nav menu fade-slide |
+
+---
+
+## App Structure & Routes
+
+```
+/ .......................... Home / Splash page
+/picks ..................... Props game — player list & scoring
+/friend/[id] .............. Props picking screen per player
+/squares ................... Squares game — player list & grid
+/squares/claim/[playerId] . Squares claiming screen per player
+/admin ..................... Admin panel (Props + Squares management)
+/leaderboard ............... Standalone leaderboard view
+/props ..................... How To Play Props (tutorial)
+/squares-howto ............. How To Play Squares (tutorial)
+/rules ..................... Rules (accordion)
+/faq ....................... FAQ (accordion)
+```
+
+---
+
+## Layout Components (Every Page)
+
+### Navbar (`components/navbar.tsx`)
+- **Ticker strip**: Scrolling marquee — "SUPER BOWL LX • SEAHAWKS VS PATRIOTS • FEB 8, 2026 • LEVI'S STADIUM • SANTA CLARA, CA"
+- **Main nav bar**: Gradient background with backdrop blur
+  - Left: Logo image + "PARTY PICKS" (Oswald 2.2rem) + "SUPER BOWL LX" subtitle (cyan)
+  - Right: Home icon, Settings gear icon (rotates on hover), Theme toggle (sun/moon)
+- Mobile: Hamburger menu with animated open state
+
+### Footer (`components/footer.tsx`)
+- Background image with dark overlay and glow effects
+- **Brand**: Logo + "PARTY PICKS" + "Super Bowl LX • New Orleans"
+- **Links**:
+  - HOW TO PLAY: Props (`/props`), Squares (`/squares-howto`)
+  - INFO: Rules (`/rules`), FAQ (`/faq`)
+- **Legal**: Disclaimer (unofficial, not affiliated) + copyright
+
+### Theme Toggle (`components/ThemeToggle.tsx`)
+- 44x44px circular button, rotates 30deg on hover
+- Persists preference via script in `<head>`
+
+---
+
+## User Experience Flow
+
+### First Visit
+1. User lands on **Home** (`/`) — animated splash with team helmets, VS badge, matchup info
+2. Two CTA buttons: **PROPS** and **SQUARES** (plus a "Select A Game" hint that bounces after 4s)
+3. Gear icon in navbar opens Admin panel
+
+### Onboarding (Admin)
+1. Admin opens `/admin` via gear icon
+2. Default state ships with 6 players (Mike, Edward, Angie, Sam, Mark, Dean) and 25 prop questions
+3. Admin can add/remove/rename players, edit/reorder prop questions
+4. Squares players auto-sync from Props players on first squares load
+
+---
+
+## Game 1: Props
+
+### How It Works
+Players answer binary questions (Option A vs Option B) about the Super Bowl. After locking, the admin scores each prop during the game. A leaderboard tracks who got the most correct.
+
+### Data Model (`lib/types.ts`)
+```
+Prop: { id, question, optionA, optionB, correctAnswer: "A"|"B"|null, order }
+Friend: { id, name, picks: Record<propId, "A"|"B"> }
+AppState: { eventName, props[], friends[], propsLocked? }
+```
+
+### Storage Key: `"sbProps"`
+
+### Default Data
+- **25 Props** (`lib/defaultProps.ts`): Anthem length, coin toss, game winner, over/under 45.5, player-specific props (Drake Maye, Jaxon Smith-Njigba, Stephon Diggs, Kenneth Walker III), field goals, touchdowns, MVP position, Gatorade color, etc.
+- **6 Default Friends** (`lib/defaultFriends.ts`): Mike, Edward, Angie, Sam, Mark, Dean — all with empty picks
+
+### User Flow
+
+**Before Locking:**
+1. `/picks` — Grid of player cards with status badges (Not Started / X of Y / Complete)
+2. Instruction: "Tap your name to start making picks"
+3. Click name → `/friend/[id]` — See all 25 props, tap A or B for each
+4. Progress bar tracks completion (X of 25)
+5. RANDOM button auto-fills remaining picks
+6. SUBMIT returns to player list
+7. When all players complete → banner: "Everyone has picked! Ready to lock?" + Lock button
+
+**After Locking:**
+1. `/picks` switches to tabbed view: **Scoring** | **Leaderboard**
+2. **Scoring tab**: Admin taps correct answer for each prop. Shows pick percentages per option
+3. **Leaderboard tab**: Ranked table — #, Name, Score, Accuracy %. Click to expand and see individual picks with correct/wrong indicators
+
+### Scoring Logic (`lib/store.ts`)
+- `getLeaderboard()` — Counts correct picks for scored props, calculates accuracy, sorts descending
+- Each correct pick = 1 point
+- Ties share the same rank
+
+### Store Functions (`lib/store.ts`)
+- **CRUD**: addFriend, renameFriend, deleteFriend, resetFriendPicks
+- **Picks**: setPick, randomizePicks, isFriendComplete, areAllFriendsComplete
+- **Props**: updateProp, reorderProps, setCorrectAnswer
+- **Locking**: lockProps, unlockProps
+- **Bulk**: clearAllPicks, clearAllResults, clearAllFriends, clearAllProps
+- **Backup**: exportBackup, importBackup
+
+---
+
+## Game 2: Squares
+
+### How It Works
+A 10x10 grid (100 squares) is divided among players. Each player claims their allotment by tapping squares. Once all 100 are claimed, the board is locked and row/column numbers (0–9) are randomly assigned. At the end of each quarter, the last digit of each team's score determines the winning square. 4 winners total (Q1, Q2, Q3, Final).
+
+### Data Model (`lib/squaresTypes.ts`)
+```
+SquaresPlayer: { id, name, color, initials? }
+Square: { row, col, ownerId: string|null }
+WinnerRecord: { checkpoint, patriotsScore, seahawksScore, patriotsDigit, seahawksDigit, winningPlayerId, winningPlayerName, timestamp, payoutAmount }
+SquaresState: { players[], board[], locked, orientation, colNumbers, rowNumbers, winners[], extraSquaresAssigned, extraPlayerIds[] }
+```
+
+### Storage Key: `"sbSquares"`
+
+### Allocation Logic
+- Base limit per player: `Math.floor(100 / playerCount)`
+- Remainder: `100 - (baseLimit * playerCount)`
+- Remainder squares randomly assigned to selected players (+1 each)
+
+### User Flow
+
+**Before Locking:**
+1. `/squares` — Grid of player cards with color swatches and status badges (Not Started / X of Y / Full)
+2. Click name → `/squares/claim/[playerId]` — 10x10 grid with progress bar
+3. Tap empty squares to claim (lights up in player's color with initial)
+4. Tap own square to unclaim
+5. RANDOM button auto-fills remaining allotment
+6. SUBMIT returns to player list
+7. When all players full but squares remain → banner with count + "Randomize Remaining" button
+8. When all 100 claimed → banner: "All squares claimed! Ready to lock?" + Lock Board button
+
+**After Locking:**
+1. `/squares` switches to tabbed view: **Squares** | **Winners**
+2. **Squares tab**: Full 10x10 grid with team banners, row/column numbers, colored cells with initials
+3. **Winners tab**: Enter scores per quarter → auto-calculates winning square from last digits → shows winner name
+4. Clicking a claimed cell highlights all of that player's squares
+
+### Unique Labels (`lib/squaresColors.ts`)
+- If only one player starts with a letter → single letter (e.g., "M" for Mike)
+- If collision → 2-letter labels (e.g., "SA" for Sam, "ST" for Steve)
+- If 2-letter collision → 3-letter labels
+- Custom initials (set in admin) always override
+
+### Winner Computation (`lib/squaresStore.ts`)
+- `computeWinner(checkpoint, patriotsScore, seahawksScore)`:
+  - Last digit: `score % 10`
+  - Patriots digit → row index via `rowNumbers.indexOf(digit)`
+  - Seahawks digit → column index via `colNumbers.indexOf(digit)`
+  - Square at intersection = winner
+
+### Store Functions (`lib/squaresStore.ts`)
+- **Players**: addSquaresPlayer, renameSquaresPlayer, removeSquaresPlayer, updatePlayerColor, updatePlayerInitials, initPlayersFromProps
+- **Board**: claimSquare, unclaimSquare, getSquare, getPlayerLimit, getPlayerClaimedCount, canPlayerClaim
+- **Allocation**: getBaseLimit, getRemainder, isBaseRoundComplete, canAssignExtras, assignExtraSquares
+- **Auto-fill**: autoFillPlayer, randomizeRemaining
+- **Locking**: lockBoard (auto-randomizes numbers), unlockBoard, canRandomize, randomizeNumbers
+- **Winners**: computeWinner, recordWinner, clearWinner
+- **Admin**: adminClearSquare, adminClearMultiple, adminPlaceForPlayer
+- **Other**: flipOrientation, exportSquaresBackup, importSquaresBackup
+
+---
+
+## Admin Panel (`/admin`)
+
+### Structure
+Two top-level mode buttons: **Props** | **Squares**
+
+### Props Mode
+Two tabs:
+
+**Scoring Tab:**
+- Lock status banner with toggle
+- All props listed with A/B buttons to mark correct answer
+- Pick percentages per option
+- Live leaderboard below
+
+**Configuration Tab** (3 sub-tabs):
+
+*Friends:*
+- Add friend form
+- Friend list with: Random Picks, Reset Picks, Rename, Delete buttons
+- All destructive actions require confirmation dialog
+
+*Props:*
+- Edit question/options for each prop
+- Reorder props (up/down)
+
+*Settings:*
+- Event name editor
+- Reset controls: Clear Picks, Clear Results, Clear Friends, Clear Props
+- Backup & Restore (JSON download/upload)
+- CSV Exports: Picks Matrix, Leaderboard
+
+### Squares Mode (`components/squares/SquaresAdmin.tsx`)
+Four tabs: **Players** | **Board** | **Numbers** | **Settings**
+
+*Players:* Add/rename/remove, color picker, initials editor, import from Props
+*Board:* Stats, assign extras, place extras on grid, auto-fill per player or all, lock/unlock, clear squares
+*Numbers:* Randomize/re-randomize row and column digits
+*Settings:* CSV exports (board, winners), full backup/restore
+
+---
+
+## Informational Pages
+
+### How To Play Props (`/props`)
+6 step cards with inline visual mockups:
+1. Add Your Friends (gear icon reference)
+2. Pick Your Name (friend cards mockup)
+3. Answer Each Question (picking screen mockup)
+4. Lock It In (lock banner mockup)
+5. Score During the Game (scoring interface mockup)
+6. Crown the Winner (leaderboard mockup)
+
+### How To Play Squares (`/squares-howto`)
+5 step cards with inline visual mockups:
+1. Add Players (gear icon reference)
+2. Pick Your Name (player cards with color swatches mockup)
+3. Claim Your Squares (mini 5x5 grid mockup)
+4. Lock the Board (lock banner + numbers grid with team labels mockup)
+5. Watch & Win (winners table with digit highlights mockup)
+
+### Rules (`/rules`)
+Accordion with 5 sections: General, Props, Squares, Payouts, Fair Play
+
+### FAQ (`/faq`)
+4 sections with expandable Q&A: Getting Started (3), Props (5), Squares (6), Admin & Setup (5)
+
+---
+
+## Shared Components
+
+| Component | File | Used On |
+|---|---|---|
+| `ConfirmDialog` | `components/ConfirmDialog.tsx` | Admin (all destructive actions), Squares page |
+| `FriendCard` | `components/FriendCard.tsx` | `/picks` player grid |
+| `PropQuestion` | `components/PropQuestion.tsx` | `/friend/[id]` picking screen |
+| `Leaderboard` | `components/Leaderboard.tsx` | `/picks` (locked), `/admin`, `/leaderboard` |
+| `SquaresGrid` | `components/squares/SquaresGrid.tsx` | `/squares` (locked), `/squares/claim/[id]`, Admin board views |
+| `SquareCell` | `components/squares/SquareCell.tsx` | Inside SquaresGrid — individual cell rendering |
+| `WinnersDisplay` | `components/squares/WinnersDisplay.tsx` | `/squares` Winners tab |
+| `PlayerSelector` | `components/squares/PlayerSelector.tsx` | Squares player selection |
+| `SquaresAdmin` | `components/squares/SquaresAdmin.tsx` | `/admin` Squares mode |
+| `ErrorBoundary` | `components/ErrorBoundary.tsx` | Root layout wrapper |
+| `Footer` | `components/footer.tsx` | Every page |
+| `Navbar` | `components/navbar.tsx` | Every page (via layout) |
+| `ThemeToggle` | `components/ThemeToggle.tsx` | Navbar |
+
+---
+
+## File Structure
+
+```
+app/
+├── layout.tsx ................. Root layout (fonts, metadata, navbar, error boundary)
+├── page.tsx ................... Home / Splash
+├── globals.css ................ ~5,000 lines — full design system
+├── admin/page.tsx ............. Admin panel
+├── picks/page.tsx ............. Props game main page
+├── friend/[id]/page.tsx ....... Props picking per player
+├── squares/page.tsx ........... Squares game main page
+├── squares/claim/[playerId]/page.tsx . Squares claiming per player
+├── leaderboard/page.tsx ....... Standalone leaderboard
+├── props/page.tsx ............. How To Play Props
+├── squares-howto/page.tsx ..... How To Play Squares
+├── rules/page.tsx ............. Rules (accordion)
+├── faq/page.tsx ............... FAQ (accordion)
+
+components/
+├── ui/ ........................ shadcn/ui (10 components)
+├── squares/ ................... Squares-specific components
+│   ├── SquaresGrid.tsx
+│   ├── SquareCell.tsx
+│   ├── WinnersDisplay.tsx
+│   ├── PlayerSelector.tsx
+│   └── SquaresAdmin.tsx
+├── navbar.tsx
+├── footer.tsx
+├── ThemeToggle.tsx
+├── ConfirmDialog.tsx
+├── FriendCard.tsx
+├── PropQuestion.tsx
+├── Leaderboard.tsx
+└── ErrorBoundary.tsx
+
+lib/
+├── types.ts ................... Props types (Prop, Friend, AppState)
+├── store.ts ................... Props localStorage store + all CRUD
+├── squaresTypes.ts ............ Squares types (SquaresPlayer, Square, WinnerRecord, SquaresState)
+├── squaresStore.ts ............ Squares localStorage store + all CRUD
+├── squaresColors.ts ........... Color palette, contrast, unique labels
+├── defaultProps.ts ............ 25 default prop questions
+├── defaultFriends.ts .......... 6 default friends
+└── utils.ts ................... cn() helper (clsx + tailwind-merge)
+
+public/images/ ................. Logos, team banners, hero image, footer background
+```
+
+---
+
+## CSS Architecture (`app/globals.css`)
+
+### Organization (~5,000 lines)
+1. **Imports & Theme** — Tailwind, tw-animate-css, shadcn, custom variant, CSS variables
+2. **Base Layer** — Border colors, body font (Barlow Condensed)
+3. **Page Root** — Min-height, background
+4. **Navbar** (~280 lines) — Ticker, nav bar, mobile menu, hamburger
+5. **Splash** (~515 lines) — Background layers, yard lines, hero, VS badge, matchup, CTAs
+6. **Friends Section** (~200 lines) — Player card grid, badges, banners
+7. **Leaderboard** (~210 lines) — Table, podium styling, expandable rows
+8. **Admin** (~560 lines) — Tab system (folder-style), sub-tabs, forms, lists, mode toggle
+9. **Picks/Props** (~230 lines) — Picking UI, progress bar, prop cards, options
+10. **How To Play** (~640 lines) — Step cards, all mockup components (friends, picking, scoring, leaderboard, grid, lock, winners)
+11. **Rules & FAQ** (~145 lines) — Accordion styling
+12. **Footer** (~150 lines) — Background image, overlay, links, legal
+13. **Squares** (~740 lines) — Grid, cells, numbers, banners, player selector, claim UI, winners table
+14. **Error Boundary** (~30 lines)
+15. **Theme Toggle** (~25 lines)
+16. **Light Mode** (~200 lines) — Systematic `.light` prefix overrides
+17. **Responsive** (~200 lines) — Mobile breakpoint adjustments
+
+### Naming Conventions
+- **Prefixed by section**: `nav-*`, `splash-*`, `hero-*`, `friend-*`, `picks-*`, `prop-*`, `sq-*`, `admin-*`, `htp-*`, `rules-*`, `faq-*`, `footer-*`
+- **State variants**: `*-active`, `*-complete`, `*-locked`, `*-empty`
+- **Light mode**: `.light .class-name { overrides }`
+
+### Responsive Strategy
+- Mobile-first with Tailwind breakpoints (`md:`)
+- Key breakpoint at `max-width: 768px` for layout shifts
+- Squares grid uses `overflow-x: auto` for small screens
+- Admin tabs stack vertically on mobile
+
+---
+
+## Key Design Decisions
+
+1. **No backend** — Fully client-side, localStorage only. Designed for in-person party use on a single device.
+2. **Two independent games** — Props and Squares share a player list but operate independently with separate lock states.
+3. **Admin-driven flow** — One host controls setup, locking, and scoring. Players only interact with picking/claiming screens.
+4. **Lock pattern** — Both games have explicit lock states that freeze all player actions and transition the UI to scoring/viewing mode.
+5. **Auto-sync players** — Squares players initialize from Props friends on first load, keeping names consistent.
+6. **Dark-first design** — Full dark mode as default, with comprehensive light mode overrides. Sports/broadcast aesthetic.
+7. **Confirmation dialogs** — All destructive admin actions require explicit confirmation.
+8. **Progressive animations** — Staggered entrance animations on splash, breathing glows, ticker scroll — creates broadcast-quality feel without being distracting.

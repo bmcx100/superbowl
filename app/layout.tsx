@@ -15,7 +15,7 @@ const barlowCondensed = Barlow_Condensed({
 })
 
 export const metadata: Metadata = {
-  title: "Super Bowl LX Prop Picks",
+  title: "Super Bowl LX Party Picks",
   description: "Make your Super Bowl LX prop picks — Seahawks vs Patriots",
 }
 

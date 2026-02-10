@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { LockOpen } from "lucide-react"
+import { ArrowLeft, LockOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Footer } from "@/components/footer"
@@ -138,8 +138,10 @@ export default function PicksPage() {
             <>
               {allComplete && (
                 <div className="picks-complete-banner">
-                  <LockOpen size={20} />
-                  <span>Everyone has picked! Ready to lock?</span>
+                  <span className="picks-banner-text">
+                    <LockOpen size={20} />
+                    Everyone has picked! Ready to lock?
+                  </span>
                   <Button className="picks-action-btn" onClick={handleLock}>
                     Lock Picks
                   </Button>
@@ -181,6 +183,13 @@ export default function PicksPage() {
           if (confirmFriend) router.push(`/friend/${confirmFriend.id}`)
         }}
       />
+
+      <div className="page-back-row">
+        <button className="picks-back" onClick={() => router.push("/")}>
+          <ArrowLeft size={22} />
+          <span>Back</span>
+        </button>
+      </div>
 
       <Footer />
     </div>
