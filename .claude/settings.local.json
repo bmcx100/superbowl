@@ -4,7 +4,9 @@
       "Bash(npx shadcn@latest add:*)",
       "Bash(npm run build:*)",
       "Bash(git add:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git checkout:*)",
+      "Bash(del \"D:\\\\1 Projects\\\\WebDev\\\\superbowl\\\\components\\\\squares\\\\ScoreDial.tsx\")"
     ]
   },
   "hooks": {
