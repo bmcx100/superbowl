@@ -71,24 +71,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Game info strip */}
-          <div className="game-info">
-            <div className="info-item">
-              <span className="info-label">DATE</span>
-              <span className="info-value">FEB 8, 2026</span>
-            </div>
-            <div className="info-sep" />
-            <div className="info-item">
-              <span className="info-label">VENUE</span>
-              <span className="info-value">LEVI'S STADIUM</span>
-            </div>
-            <div className="info-sep" />
-            <div className="info-item">
-              <span className="info-label">LOCATION</span>
-              <span className="info-value">SANTA CLARA, CA</span>
-            </div>
-          </div>
-
           {/* CTA */}
           <div className="cta-area">
             <div className="cta-buttons">
@@ -99,7 +81,7 @@ export default function Home() {
                 SQUARES
               </Button>
             </div>
-            <p className="cta-sub">Free to play &bull; Bragging rights guaranteed</p>
+            <p className="cta-heading">Select A Game</p>
           </div>
         </main>
       </div>

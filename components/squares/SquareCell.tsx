@@ -5,13 +5,14 @@ import type { SquaresPlayer } from "@/lib/squaresTypes"
 
 interface SquareCellProps {
   owner: SquaresPlayer | null
+  label?: string
   winnerLabel?: string | null
   onClick?: () => void
   interactive?: boolean
   highlighted?: boolean
 }
 
-export function SquareCell({ owner, winnerLabel, onClick, interactive, highlighted }: SquareCellProps) {
+export function SquareCell({ owner, label, winnerLabel, onClick, interactive, highlighted }: SquareCellProps) {
   if (!owner) {
     return (
       <div
@@ -24,7 +25,7 @@ export function SquareCell({ owner, winnerLabel, onClick, interactive, highlight
   const isActive = highlighted === true
   const bgColor = isActive ? owner.color : "#d1d5db"
   const textColor = isActive ? getContrastColor(owner.color) : "#555"
-  const initial = owner.initials ?? owner.name.charAt(0).toUpperCase()
+  const initial = label ?? owner.initials ?? owner.name.charAt(0).toUpperCase()
 
   return (
     <div

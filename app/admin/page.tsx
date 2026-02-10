@@ -34,9 +34,11 @@ import {
   clearAllResults,
   clearAllFriends,
   clearAllProps,
+  setCorrectAnswer,
 } from "@/lib/store"
 import { exportSquaresBackup, importSquaresBackup } from "@/lib/squaresStore"
 import { SquaresAdmin } from "@/components/squares/SquaresAdmin"
+import { Leaderboard } from "@/components/Leaderboard"
 import type { AppState, Friend, Prop } from "@/lib/types"
 
 export default function AdminPage() {
@@ -270,6 +272,11 @@ export default function AdminPage() {
     URL.revokeObjectURL(url)
   }
 
+  const handleScore = (propId: string, value: "A" | "B" | null) => {
+    setCorrectAnswer(propId, value)
+    refresh()
+  }
+
   const [adminMode, setAdminMode] = useState<"props" | "squares">("props")
 
   if (!appState) return null
@@ -348,18 +355,63 @@ export default function AdminPage() {
       )}
 
       {adminMode === "props" && (
-      <Tabs defaultValue="friends" className="admin-tabs">
+      <Tabs defaultValue="scoring" className="admin-tabs">
         <TabsList className="admin-tabs-list">
-          <TabsTrigger value="friends" className="admin-tab-trigger">
-            Friends
+          <TabsTrigger value="scoring" className="admin-tab-trigger">
+            Scoring
           </TabsTrigger>
-          <TabsTrigger value="props" className="admin-tab-trigger">
-            Props
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="admin-tab-trigger">
-            Settings
+          <TabsTrigger value="configuration" className="admin-tab-trigger">
+            Configuration
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="scoring" className="admin-scoring-sheet">
+          <div className="admin-scoring-list">
+            {sortedProps.map((prop, i) => (
+              <div key={prop.id} className="admin-scoring-row">
+                <div className="admin-scoring-info">
+                  <span className="admin-prop-order">{i + 1}</span>
+                  <span className="admin-prop-question">{prop.question}</span>
+                </div>
+                <div className="admin-scoring-buttons">
+                  <Button
+                    variant={prop.correctAnswer === "A" ? "default" : "outline"}
+                    className={`admin-score-btn ${prop.correctAnswer === "A" ? "admin-score-active" : ""}`}
+                    onClick={() => handleScore(prop.id, prop.correctAnswer === "A" ? null : "A")}
+                  >
+                    {prop.optionA}
+                  </Button>
+                  <Button
+                    variant={prop.correctAnswer === "B" ? "default" : "outline"}
+                    className={`admin-score-btn ${prop.correctAnswer === "B" ? "admin-score-active" : ""}`}
+                    onClick={() => handleScore(prop.id, prop.correctAnswer === "B" ? null : "B")}
+                  >
+                    {prop.optionB}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="admin-scoring-leaderboard">
+            <h3 className="admin-section-title">Live Leaderboard</h3>
+            <Leaderboard entries={leaderboard} />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="configuration" className="admin-folder-sheet">
+          <Tabs defaultValue="friends" className="admin-sub-tabs">
+            <TabsList className="admin-sub-tabs-list">
+              <TabsTrigger value="friends" className="admin-tab-trigger" data-value="friends">
+                Friends
+              </TabsTrigger>
+              <TabsTrigger value="props" className="admin-tab-trigger" data-value="props">
+                Props
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="admin-tab-trigger" data-value="settings">
+                Settings
+              </TabsTrigger>
+            </TabsList>
 
             <TabsContent value="friends" className="admin-sub-sheet admin-sub-sheet-friends">
               {lockBanner}
@@ -594,6 +646,8 @@ export default function AdminPage() {
                 </div>
               </div>
             </TabsContent>
+          </Tabs>
+        </TabsContent>
       </Tabs>
       )}
 

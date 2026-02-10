@@ -33,16 +33,14 @@ export function Footer() {
 
           <div className="footer-links">
             <div className="footer-col">
-              <span className="footer-col-heading">GAME</span>
-              <a href="#" className="footer-link">Props</a>
-              <a href="#" className="footer-link">Leaderboard</a>
-              <a href="#" className="footer-link">How to Play</a>
+              <span className="footer-col-heading">HOW TO PLAY</span>
+              <a href="/props" className="footer-link">Props</a>
+              <a href="/squares-howto" className="footer-link">Squares</a>
             </div>
             <div className="footer-col">
               <span className="footer-col-heading">INFO</span>
-              <a href="#" className="footer-link">Rules</a>
-              <a href="#" className="footer-link">FAQ</a>
-              <a href="#" className="footer-link">Contact</a>
+              <a href="/rules" className="footer-link">Rules</a>
+              <a href="/faq" className="footer-link">FAQ</a>
             </div>
           </div>
         </div>

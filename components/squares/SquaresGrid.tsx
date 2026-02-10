@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import { SquareCell } from "./SquareCell"
+import { getUniqueLabels } from "@/lib/squaresColors"
 import type { SquaresState, SquaresPlayer } from "@/lib/squaresTypes"
 
 interface SquaresGridProps {
@@ -26,6 +27,8 @@ export function SquaresGrid({ state, onCellClick, onEmptyCellClick, interactive,
 
   const playerMap = new Map<string, SquaresPlayer>()
   for (const p of players) playerMap.set(p.id, p)
+
+  const labelMap = getUniqueLabels(players)
 
   // Build winner map: row-col key -> checkpoint label
   // Patriots last digit → row, Seahawks last digit → column
@@ -93,6 +96,7 @@ export function SquaresGrid({ state, onCellClick, onEmptyCellClick, interactive,
                   <SquareCell
                     key={`${r}-${c}`}
                     owner={owner}
+                    label={owner ? labelMap.get(owner.id) : undefined}
                     winnerLabel={winLabel}
                     interactive={interactive || !!onEmptyCellClick}
                     highlighted={isHighlighted}

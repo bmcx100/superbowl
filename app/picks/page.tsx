@@ -88,6 +88,7 @@ export default function PicksPage() {
 
           {isLocked ? (
             <div className="picks-locked-view">
+              <p className="picks-instruction">Tap the correct answers to score, then check the leaderboard</p>
               <Tabs defaultValue="scoring" className="picks-locked-tabs">
                 <TabsList className="picks-locked-tabs-list">
                   <TabsTrigger value="scoring">Scoring</TabsTrigger>
@@ -143,6 +144,10 @@ export default function PicksPage() {
                     Lock Picks
                   </Button>
                 </div>
+              )}
+
+              {!allComplete && (
+                <p className="picks-instruction">Tap your name to start making picks</p>
               )}
 
               <div className="friend-grid">

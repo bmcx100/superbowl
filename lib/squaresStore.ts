@@ -259,10 +259,40 @@ export function autoFillPlayer(playerId: string): void {
   saveSquaresState(state)
 }
 
+export function randomizeRemaining(): void {
+  const state = getSquaresState()
+  if (state.locked) return
+  const remainder = getRemainder(state.players.length)
+  const shuffled = [...state.players].sort(() => Math.random() - 0.5)
+  const selected = shuffled.slice(0, remainder).map((p) => p.id)
+  state.extraPlayerIds = selected
+  state.extraSquaresAssigned = true
+  const unclaimed = state.board.filter((sq) => sq.ownerId === null)
+  for (let i = unclaimed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = unclaimed[i]
+    unclaimed[i] = unclaimed[j]
+    unclaimed[j] = temp
+  }
+  let idx = 0
+  for (const pid of selected) {
+    const limit = getPlayerLimit(state, pid)
+    let claimed = getPlayerClaimedCount(state, pid)
+    while (claimed < limit && idx < unclaimed.length) {
+      unclaimed[idx].ownerId = pid
+      claimed++
+      idx++
+    }
+  }
+  saveSquaresState(state)
+}
+
 // Step 1.9 — Lock board
 export function lockBoard(): void {
   const state = getSquaresState()
   state.locked = true
+  state.colNumbers = fisherYatesShuffle()
+  state.rowNumbers = fisherYatesShuffle()
   saveSquaresState(state)
 }
 

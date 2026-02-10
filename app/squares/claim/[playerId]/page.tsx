@@ -16,7 +16,7 @@ import {
   autoFillPlayer,
 } from "@/lib/squaresStore"
 import { getState } from "@/lib/store"
-import { getContrastColor } from "@/lib/squaresColors"
+import { getContrastColor, getPlayerLabel } from "@/lib/squaresColors"
 import type { SquaresState, SquaresPlayer } from "@/lib/squaresTypes"
 
 export default function ClaimPage() {
@@ -110,7 +110,7 @@ export default function ClaimPage() {
               className="sq-claim-color"
               style={{ backgroundColor: player.color, color: getContrastColor(player.color) }}
             >
-              {player.initials ?? player.name.charAt(0).toUpperCase()}
+              {getPlayerLabel(state.players, player.id)}
             </div>
             <div className="sq-claim-name-text">
               <h1 className="picks-friend-name">{player.name}</h1>

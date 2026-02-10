@@ -16,8 +16,9 @@ import {
   getPlayerClaimedCount,
   getUnclaimedCount,
   lockBoard,
+  randomizeRemaining,
 } from "@/lib/squaresStore"
-import { getContrastColor } from "@/lib/squaresColors"
+import { getContrastColor, getUniqueLabels } from "@/lib/squaresColors"
 import type { SquaresState, SquaresPlayer } from "@/lib/squaresTypes"
 
 export default function SquaresPage() {
@@ -37,6 +38,7 @@ export default function SquaresPage() {
   if (!state) return null
 
   const unclaimed = getUnclaimedCount(state)
+  const labelMap = getUniqueLabels(state.players)
   const allFull = !state.locked && unclaimed === 0
   const allPlayersFull = !state.locked && !allFull && state.players.length > 0 && state.players.every(
     (p) => getPlayerClaimedCount(state, p.id) >= getPlayerLimit(state, p.id)
@@ -67,7 +69,14 @@ export default function SquaresPage() {
 
         {allPlayersFull && (
           <div className="picks-complete-banner">
-            <span>All users selected, but {unclaimed} squares still available. Go to Admin Panel → Squares → Board to assign extra squares.</span>
+            <LockOpen size={20} />
+            <span className="sq-remaining-msg">
+              <span className="sq-remaining-count">{unclaimed} Squares Remaining</span>
+              <span className="sq-remaining-sub">Randomly assign them or go to admin for manual entry</span>
+            </span>
+            <Button className="picks-action-btn" onClick={() => { randomizeRemaining(); refresh() }}>
+              Randomize Remaining
+            </Button>
           </div>
         )}
 
@@ -123,7 +132,7 @@ export default function SquaresPage() {
                   onClick={() => handlePlayerClick(player)}
                 >
                   <div className="sq-card-swatch" style={{ backgroundColor: player.color, color: getContrastColor(player.color) }}>
-                    {player.initials ?? player.name.charAt(0).toUpperCase()}
+                    {labelMap.get(player.id) ?? player.name.charAt(0).toUpperCase()}
                   </div>
                   <span className="friend-card-name">{player.name}</span>
                   <Badge className={`friend-badge friend-badge-${status}`}>

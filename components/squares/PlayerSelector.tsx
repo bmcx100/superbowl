@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { X } from "lucide-react"
-import { getContrastColor } from "@/lib/squaresColors"
+import { getContrastColor, getUniqueLabels } from "@/lib/squaresColors"
 import { getPlayerLimit, getPlayerClaimedCount } from "@/lib/squaresStore"
 import type { SquaresState } from "@/lib/squaresTypes"
 
@@ -12,6 +12,7 @@ interface PlayerSelectorProps {
 }
 
 export function PlayerSelector({ state, onClose }: PlayerSelectorProps) {
+  const labelMap = getUniqueLabels(state.players)
   return (
     <div className="sq-player-selector">
       <div className="sq-player-selector-header">
@@ -38,7 +39,7 @@ export function PlayerSelector({ state, onClose }: PlayerSelectorProps) {
               className="sq-player-color"
               style={{ backgroundColor: player.color, color: getContrastColor(player.color) }}
             >
-              {player.initials ?? player.name.charAt(0).toUpperCase()}
+              {labelMap.get(player.id) ?? player.name.charAt(0).toUpperCase()}
             </div>
             <div className="sq-player-info">
               <span className="sq-player-name">{player.name}</span>

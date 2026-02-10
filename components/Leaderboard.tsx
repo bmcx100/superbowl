@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Fragment } from "react"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { getState } from "@/lib/store"
 import type { LeaderboardEntry } from "@/lib/store"
@@ -83,9 +83,8 @@ export function Leaderboard({ entries }: LeaderboardProps) {
             const friend = state.friends.find((f) => f.id === entry.id)
 
             return (
-              <>
+              <Fragment key={entry.id}>
                 <tr
-                  key={entry.id}
                   className={`${podium} leaderboard-clickable`}
                   onClick={() => handleRowClick(entry.id)}
                 >
@@ -126,7 +125,7 @@ export function Leaderboard({ entries }: LeaderboardProps) {
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             )
           })}
         </tbody>
